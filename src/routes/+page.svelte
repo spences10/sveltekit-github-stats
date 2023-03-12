@@ -5,22 +5,6 @@
 	let user: string = $page.url.searchParams.get('user')?.toString() || '';
 
 	export let data: any;
-
-	// const getData = async () => {
-	// 	const res = await fetch(`${$page.url}github-contributions.json?user=spences10`);
-	// 	if (res.ok) {
-	// 		const data = await res.json();
-	// 		return {
-	// 			data
-	// 		};
-	// 	}
-	// };
-
-	// let userData: { data: any } | undefined;
-	// onMount(async () => {
-	// 	userData = await getData();
-	// 	console.log(userData);
-	// });
 </script>
 
 <pre>{JSON.stringify(data, null, 2)}</pre>

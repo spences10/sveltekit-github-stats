@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@chakra-ui/core": "1.0.0-rc.8",
-    "@octokit/rest": "18.12.0",
+    "@octokit/rest": "19.0.7",
     "@saber2pr/types-github-api": "0.0.7",
     "@vercel/node": "1.12.1",
     "framer-motion": "6.2.6",

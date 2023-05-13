@@ -11,7 +11,7 @@
     "@chakra-ui/core": "1.0.0-rc.8",
     "@octokit/rest": "18.12.0",
     "@saber2pr/types-github-api": "0.0.7",
-    "@vercel/node": "1.12.1",
+    "@vercel/node": "2.14.2",
     "framer-motion": "6.2.6",
     "next": "12.0.10",
     "react": "17.0.2",

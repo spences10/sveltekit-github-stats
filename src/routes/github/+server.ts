@@ -3,25 +3,29 @@ import { json } from '@sveltejs/kit'
 
 export const GET = async ({ url, fetch }) => {
 	const username = url.searchParams.get('username')
+	const year = url.searchParams.get('year')
 
 	const query = `
-	  query {
-		    user(login: "${username}") {
-	      contributionsCollection(from: "2022-01-01T00:00:00Z", to: "2022-12-31T23:59:59Z") {
-		        contributionCalendar {
-			          totalContributions
-			          weeks {
-				            contributionDays {
-					              contributionCount
-					              date
-					              weekday
-					            }
-					          }
-					        }
-					      }
-					    }
-					  }
-					`
+		{
+			user(login: "${username}") {
+				contributionsCollection(
+					from: "${year}-01-01T00:00:00Z"
+					to: "${year}-12-31T23:59:59Z"
+				) {
+					contributionCalendar {
+						totalContributions
+						weeks {
+							contributionDays {
+								contributionCount
+								date
+								weekday
+							}
+						}
+					}
+				}
+			}
+		}
+		`
 
 	const response = await fetch('https://api.github.com/graphql', {
 		method: 'POST',

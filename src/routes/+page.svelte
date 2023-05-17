@@ -31,13 +31,13 @@
 <form
 	method="POST"
 	on:submit|preventDefault={handle_submit}
-	class="flex flex-col max-w-4xl mx-auto space-y-4"
+	class="flex flex-col max-w-4xl space-y-4 my-10"
 >
 	<input
 		bind:value={username}
 		placeholder="Enter GitHub username"
 		required
-		class="input"
+		class="input input-primary"
 	/>
 	<input
 		type="number"
@@ -45,27 +45,29 @@
 		placeholder="Year (e.g., 2022)"
 		min="2008"
 		required
-		class="input"
+		class="input input-primary"
 	/>
-	<button type="submit" disabled={loading} class="btn">
+	<button type="submit" disabled={loading} class="btn btn-primary">
 		Fetch Contributions
 	</button>
 </form>
 
-{#if loading}
-	<p class="prose prose-xl">Loading...</p>
-{:else if contributions}
-	<div class="prose prose-xl">
-		<h2>Total Contributions: {contributions.totalContributions}</h2>
-		<h3>Contribution Details:</h3>
-		{#each contributions.weeks as week}
-			{#each week.contributionDays as day}
-				<p>
-					Date: {day.date}, Contributions: {day.contributionCount}
-				</p>
+<div class="prose prose-xl">
+	{#if loading}
+		<p>Loading...</p>
+	{:else if contributions}
+		<div>
+			<h2>Total Contributions: {contributions.totalContributions}</h2>
+			<h3>Contribution Details:</h3>
+			{#each contributions.weeks as week}
+				{#each week.contributionDays as day}
+					<p>
+						Date: {day.date}, Contributions: {day.contributionCount}
+					</p>
+				{/each}
 			{/each}
-		{/each}
-	</div>
-{:else}
-	<p class="prose prose-xl">No contributions data to display.</p>
-{/if}
+		</div>
+	{:else}
+		<p>No contributions data to display.</p>
+	{/if}
+</div>

@@ -1,42 +1,41 @@
-import { GITHUB_GRAPHQL_TOKEN } from '$env/static/private';
+import { GITHUB_TOKEN } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 
 export const GET = async ({ url, fetch }) => {
 	const username = url.searchParams.get('username');
 	const year = url.searchParams.get('year');
 
-	const query = `
-		{
-			user(login: "${username}") {
-				contributionsCollection(
-					from: "${year}-01-01T00:00:00Z"
-					to: "${year}-12-31T23:59:59Z"
-				) {
-					contributionCalendar {
-						totalContributions
-						weeks {
-							contributionDays {
-								contributionCount
-								date
-								weekday
-							}
-						}
-					}
-				}
-			}
-		}
-		`;
+	if (!username || !year) {
+		return json(
+			{ error: 'Username and year are required' },
+			{ status: 400 },
+		);
+	}
 
-	const response = await fetch('https://api.github.com/graphql', {
-		method: 'POST',
+	const startDate = `${year}-01-01`;
+	const endDate = `${year}-12-31`;
+
+	const apiUrl = `https://api.github.com/users/${username}/contributions?from=${startDate}&to=${endDate}`;
+
+	const response = await fetch(apiUrl, {
 		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${GITHUB_GRAPHQL_TOKEN}`,
+			Authorization: `token ${GITHUB_TOKEN}`,
+			Accept: 'application/vnd.github.v3+json',
 		},
-		body: JSON.stringify({ query }),
 	});
 
+	if (!response.ok) {
+		return json(
+			{ error: 'Failed to fetch data from GitHub' },
+			{ status: response.status },
+		);
+	}
+
 	const data = await response.json();
+
+	console.log('=====================')
+	console.log(data)
+	console.log('=====================')
 
 	return json(data);
 };

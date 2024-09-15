@@ -1,72 +1,75 @@
 <script lang="ts">
-	let username = '';
-	let year = '2022';
-	let contributions: { totalContributions: any; weeks: any } | null =
-		null;
+	import type { ActionData } from './$types';
 
-	let loading = false;
+	let { form } = $props<{ form: ActionData }>();
+	let username = $state('');
+	let showAdvancedOptions = $state(false);
+	let year = $state(new Date().getFullYear().toString());
+	let since = $state('');
+	let until = $state('');
 
-	const fetch_contributions = async () => {
-		loading = true;
-		const response = await fetch(
-			`github?username=${username}&year=${year}`,
-		);
-		const data = await response.json();
-
-		if (data.data && data.data.user) {
-			contributions =
-				data.data.user.contributionsCollection.contributionCalendar;
-		} else {
-			contributions = null;
+	$effect(() => {
+		if (!showAdvancedOptions) {
+			const today = new Date().toISOString().split('T')[0];
+			since = today;
+			until = today;
 		}
-
-		loading = false;
-	};
-
-	const handle_submit = () => {
-		fetch_contributions();
-	};
+	});
 </script>
 
-<form
-	method="POST"
-	on:submit|preventDefault={handle_submit}
-	class="flex flex-col max-w-4xl space-y-4 my-10"
->
+<form method="POST" class="my-10 flex max-w-4xl flex-col space-y-4">
 	<input
+		name="username"
 		bind:value={username}
 		placeholder="Enter GitHub username"
 		required
 		class="input input-primary"
 	/>
-	<input
-		type="number"
-		bind:value={year}
-		placeholder="Year (e.g., 2022)"
-		min="2008"
-		required
-		class="input input-primary"
-	/>
-	<button type="submit" disabled={loading} class="btn btn-primary">
-		Fetch Contributions
+	<button type="submit" class="btn btn-primary">
+		Fetch Today's Contributions
 	</button>
+
+	<details bind:open={showAdvancedOptions}>
+		<summary class="cursor-pointer">Advanced Options</summary>
+		<div class="mt-4 space-y-4">
+			<input
+				name="year"
+				type="number"
+				bind:value={year}
+				placeholder="Year (e.g., 2023)"
+				min="2008"
+				max={new Date().getFullYear()}
+				class="input input-primary"
+			/>
+			<input
+				name="since"
+				type="date"
+				bind:value={since}
+				placeholder="Since"
+				class="input input-primary"
+			/>
+			<input
+				name="until"
+				type="date"
+				bind:value={until}
+				placeholder="Until"
+				class="input input-primary"
+			/>
+		</div>
+	</details>
 </form>
 
 <div class="prose prose-xl">
-	{#if loading}
+	{#if form?.loading}
 		<p>Loading...</p>
-	{:else if contributions}
-		<div>
-			<h2>Total Contributions: {contributions.totalContributions}</h2>
-			<h3>Contribution Details:</h3>
-			{#each contributions.weeks as week}
-				{#each week.contributionDays as day}
-					<p>
-						Date: {day.date}, Contributions: {day.contributionCount}
-					</p>
-				{/each}
-			{/each}
-		</div>
+	{:else if form?.totalCommits !== undefined}
+			<div>
+				<h2>Contributions for {form.username}</h2>
+				<p>Total Commits: {form.totalCommits}</p>
+				<p>Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(form.until).toLocaleDateString()}</p>
+			</div>
+	{:else if form?.error}
+		<p class="text-error">{form.error}</p>
 	{:else}
 		<p>No contributions data to display.</p>
 	{/if}

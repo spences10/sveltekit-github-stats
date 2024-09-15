@@ -11,32 +11,38 @@ export const GET = async ({ url, fetch }) => {
 		return json({ error: 'Username is required' }, { status: 400 });
 	}
 
-	const apiUrl = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}`;
+	const api_url = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}`;
 
 	try {
-		const response = await fetch(apiUrl, {
+		const response = await fetch(api_url, {
 			headers: {
-				'Authorization': `token ${GITHUB_TOKEN}`,
-				'Accept': 'application/vnd.github.v3+json',
+				Authorization: `token ${GITHUB_TOKEN}`,
+				Accept: 'application/vnd.github.v3+json',
 			},
 		});
 
 		if (!response.ok) {
-			const errorText = await response.text();
-			console.error('GitHub API Error:', errorText);
-			return json({ error: 'Failed to fetch data from GitHub' }, { status: response.status });
+			const error_text = await response.text();
+			console.error('GitHub API Error:', error_text);
+			return json(
+				{ error: 'Failed to fetch data from GitHub' },
+				{ status: response.status },
+			);
 		}
 
 		const data = await response.json();
-		
+
 		return json({
 			username,
-			totalCommits: data.total_count,
+			total_commits: data.total_count,
 			since,
-			until
+			until,
 		});
 	} catch (error) {
 		console.error('Error fetching GitHub data:', error);
-		return json({ error: 'An error occurred while fetching data' }, { status: 500 });
+		return json(
+			{ error: 'An error occurred while fetching data' },
+			{ status: 500 },
+		);
 	}
 };

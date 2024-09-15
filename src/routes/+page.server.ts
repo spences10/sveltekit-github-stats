@@ -19,8 +19,8 @@ export const actions: Actions = {
 				const errorData = await response.json();
 				return fail(response.status, { error: errorData.error });
 			}
-			const contributionsData = await response.json();
-			return contributionsData;
+			const contributions_data = await response.json();
+			return contributions_data;
 		} catch (error) {
 			return fail(500, { error: 'Failed to fetch contributions' });
 		}

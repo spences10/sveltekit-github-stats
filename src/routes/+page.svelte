@@ -3,13 +3,13 @@
 
 	let { form } = $props<{ form: ActionData }>();
 	let username = $state('');
-	let showAdvancedOptions = $state(false);
+	let show_advanced_options = $state(false);
 	let year = $state(new Date().getFullYear().toString());
 	let since = $state('');
 	let until = $state('');
 
 	$effect(() => {
-		if (!showAdvancedOptions) {
+		if (!show_advanced_options) {
 			const today = new Date().toISOString().split('T')[0];
 			since = today;
 			until = today;
@@ -29,7 +29,7 @@
 		Fetch Today's Contributions
 	</button>
 
-	<details bind:open={showAdvancedOptions}>
+	<details bind:open={show_advanced_options}>
 		<summary class="cursor-pointer">Advanced Options</summary>
 		<div class="mt-4 space-y-4">
 			<input
@@ -62,12 +62,16 @@
 <div class="prose prose-xl">
 	{#if form?.loading}
 		<p>Loading...</p>
-	{:else if form?.totalCommits !== undefined}
-			<div>
-				<h2>Contributions for {form.username}</h2>
-				<p>Total Commits: {form.totalCommits}</p>
-				<p>Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(form.until).toLocaleDateString()}</p>
-			</div>
+	{:else if form?.total_commits !== undefined}
+		<div>
+			<h2>Contributions for {form.username}</h2>
+			<p>Total Commits: {form.total_commits}</p>
+			<p>
+				Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(
+					form.until,
+				).toLocaleDateString()}
+			</p>
+		</div>
 	{:else if form?.error}
 		<p class="text-error">{form.error}</p>
 	{:else}

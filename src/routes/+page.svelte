@@ -1,31 +1,31 @@
 <script lang="ts">
-	let username = ''
-	let year = '2022'
+	let username = '';
+	let year = '2022';
 	let contributions: { totalContributions: any; weeks: any } | null =
-		null
+		null;
 
-	let loading = false
+	let loading = false;
 
 	const fetch_contributions = async () => {
-		loading = true
+		loading = true;
 		const response = await fetch(
-			`github?username=${username}&year=${year}`
-		)
-		const data = await response.json()
+			`github?username=${username}&year=${year}`,
+		);
+		const data = await response.json();
 
 		if (data.data && data.data.user) {
 			contributions =
-				data.data.user.contributionsCollection.contributionCalendar
+				data.data.user.contributionsCollection.contributionCalendar;
 		} else {
-			contributions = null
+			contributions = null;
 		}
 
-		loading = false
-	}
+		loading = false;
+	};
 
 	const handle_submit = () => {
-		fetch_contributions()
-	}
+		fetch_contributions();
+	};
 </script>
 
 <form

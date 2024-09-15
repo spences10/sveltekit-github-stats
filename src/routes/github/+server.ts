@@ -1,9 +1,9 @@
-import { GITHUB_GRAPHQL_TOKEN } from '$env/static/private'
-import { json } from '@sveltejs/kit'
+import { GITHUB_GRAPHQL_TOKEN } from '$env/static/private';
+import { json } from '@sveltejs/kit';
 
 export const GET = async ({ url, fetch }) => {
-	const username = url.searchParams.get('username')
-	const year = url.searchParams.get('year')
+	const username = url.searchParams.get('username');
+	const year = url.searchParams.get('year');
 
 	const query = `
 		{
@@ -25,7 +25,7 @@ export const GET = async ({ url, fetch }) => {
 				}
 			}
 		}
-		`
+		`;
 
 	const response = await fetch('https://api.github.com/graphql', {
 		method: 'POST',
@@ -34,9 +34,9 @@ export const GET = async ({ url, fetch }) => {
 			Authorization: `Bearer ${GITHUB_GRAPHQL_TOKEN}`,
 		},
 		body: JSON.stringify({ query }),
-	})
+	});
 
-	const data = await response.json()
+	const data = await response.json();
 
-	return json(data)
-}
+	return json(data);
+};

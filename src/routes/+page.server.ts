@@ -14,7 +14,9 @@ export const actions: Actions = {
 		}
 
 		try {
-			const response = await fetch(`/api/github?username=${username}&since=${since}&until=${until}`);
+			const response = await fetch(
+				`/api/github?username=${username}&since=${since}&until=${until}`,
+			);
 			if (!response.ok) {
 				const error_data = await response.json();
 				return fail(response.status, { error: error_data.error });
@@ -24,5 +26,5 @@ export const actions: Actions = {
 		} catch (error) {
 			return fail(500, { error: 'Failed to fetch contributions' });
 		}
-	}
+	},
 };

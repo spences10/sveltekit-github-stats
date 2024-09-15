@@ -1,5 +1,5 @@
 {
-	"name": "delete-this",
+	"name": "sveltekit-github-user-stats",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {

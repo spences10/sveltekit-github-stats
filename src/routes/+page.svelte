@@ -17,49 +17,74 @@
 	});
 </script>
 
-<form method="POST" class="my-10 flex max-w-4xl flex-col space-y-4">
+<form method="POST" class="form-control w-full">
+	<label for="username" class="label">
+		<span class="label-text">GitHub Username</span>
+	</label>
 	<input
+		id="username"
 		name="username"
 		bind:value={username}
 		placeholder="Enter GitHub username"
 		required
-		class="input input-primary"
+		class="input input-bordered w-full"
 	/>
-	<button type="submit" class="btn btn-primary">
+	<button type="submit" class="btn btn-primary mt-4">
 		Fetch Today's Contributions
 	</button>
 
-	<details bind:open={show_advanced_options}>
-		<summary class="cursor-pointer">Advanced Options</summary>
-		<div class="mt-4 space-y-4">
-			<input
-				name="year"
-				type="number"
-				bind:value={year}
-				placeholder="Year (e.g., 2023)"
-				min="2008"
-				max={new Date().getFullYear()}
-				class="input input-primary"
-			/>
-			<input
-				name="since"
-				type="date"
-				bind:value={since}
-				placeholder="Since"
-				class="input input-primary"
-			/>
-			<input
-				name="until"
-				type="date"
-				bind:value={until}
-				placeholder="Until"
-				class="input input-primary"
-			/>
+	<div class="divider">Advanced Options</div>
+
+	<div class="collapse collapse-plus bg-base-200">
+		<input type="checkbox" bind:checked={show_advanced_options} /> 
+		<div class="collapse-title text-xl font-medium">
+			Show Advanced Options
 		</div>
-	</details>
+		<div class="collapse-content">
+			<div class="form-control">
+				<label for="year" class="label">
+					<span class="label-text">Year</span>
+				</label>
+				<input
+					id="year"
+					name="year"
+					type="number"
+					bind:value={year}
+					placeholder="Year (e.g., 2023)"
+					min="2008"
+					max={new Date().getFullYear()}
+					class="input input-bordered w-full"
+				/>
+			</div>
+			<div class="form-control">
+				<label for="since" class="label">
+					<span class="label-text">Since</span>
+				</label>
+				<input
+					id="since"
+					name="since"
+					type="date"
+					bind:value={since}
+					class="input input-bordered w-full"
+				/>
+			</div>
+			<div class="form-control">
+				<label for="until" class="label">
+					<span class="label-text">Until</span>
+				</label>
+				<input
+					id="until"
+					name="until"
+					type="date"
+					bind:value={until}
+					class="input input-bordered w-full"
+				/>
+			</div>
+		</div>
+	</div>
 </form>
 
-<div class="prose prose-xl">
+<div class="prose prose-xl mt-8">
 	{#if form?.loading}
 		<p>Loading...</p>
 	{:else if form?.total_commits !== undefined}

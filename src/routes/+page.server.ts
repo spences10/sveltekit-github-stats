@@ -16,8 +16,8 @@ export const actions: Actions = {
 		try {
 			const response = await fetch(`/api/github?username=${username}&since=${since}&until=${until}`);
 			if (!response.ok) {
-				const errorData = await response.json();
-				return fail(response.status, { error: errorData.error });
+				const error_data = await response.json();
+				return fail(response.status, { error: error_data.error });
 			}
 			const contributions_data = await response.json();
 			return contributions_data;

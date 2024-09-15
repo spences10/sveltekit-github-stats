@@ -71,6 +71,18 @@
 					form.until,
 				).toLocaleDateString()}
 			</p>
+			
+			<h3>Repositories Contributed To:</h3>
+			<ul>
+				{#each form.repositories as repo}
+					<li>
+						<a href={repo.url} target="_blank" rel="noopener noreferrer">
+							{repo.name}
+						</a>
+						: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
+					</li>
+				{/each}
+			</ul>
 		</div>
 	{:else if form?.error}
 		<p class="text-error">{form.error}</p>

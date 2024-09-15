@@ -11,7 +11,7 @@ export const GET = async ({ url, fetch }) => {
 		return json({ error: 'Username is required' }, { status: 400 });
 	}
 
-	const api_url = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}`;
+	const api_url = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}&per_page=100`;
 
 	try {
 		const response = await fetch(api_url, {
@@ -32,11 +32,38 @@ export const GET = async ({ url, fetch }) => {
 
 		const data = await response.json();
 
+		interface RepoContribution {
+			name: string;
+			url: string;
+			commits: number;
+		}
+
+		const repo_contributions = data.items.reduce(
+			(acc: Record<string, RepoContribution>, item: any) => {
+				const repo_name = item.repository.full_name;
+				if (!acc[repo_name]) {
+					acc[repo_name] = {
+						name: repo_name,
+						url: item.repository.html_url,
+						commits: 0,
+					};
+				}
+				acc[repo_name].commits++;
+				return acc;
+			},
+			{},
+		);
+
+		const sorted_repositories = (
+			Object.values(repo_contributions) as RepoContribution[]
+		).sort((a, b) => b.commits - a.commits);
+
 		return json({
 			username,
 			total_commits: data.total_count,
 			since,
 			until,
+			repositories: sorted_repositories,
 		});
 	} catch (error) {
 		console.error('Error fetching GitHub data:', error);

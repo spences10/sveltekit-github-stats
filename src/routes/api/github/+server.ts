@@ -1,6 +1,13 @@
 import { GITHUB_TOKEN } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 
+interface RepoContribution {
+	name: string;
+	url: string;
+	commits: number;
+	last_updated: Date;
+}
+
 export const GET = async ({ url, fetch }) => {
 	const username = url.searchParams.get('username');
 	const since = url.searchParams.get('since');
@@ -51,7 +58,9 @@ export const GET = async ({ url, fetch }) => {
 			}
 		}
 
-		const repo_contributions = all_items.reduce((acc, item) => {
+		const repo_contributions = all_items.reduce<
+			Record<string, RepoContribution>
+		>((acc, item) => {
 			const repo_name = item.repository.full_name;
 			if (!acc[repo_name]) {
 				acc[repo_name] = {
@@ -73,7 +82,10 @@ export const GET = async ({ url, fetch }) => {
 
 		const sorted_repositories = Object.values(
 			repo_contributions,
-		).sort((a, b) => b.last_updated - a.last_updated);
+		).sort(
+			(a: RepoContribution, b: RepoContribution) =>
+				b.last_updated.getTime() - a.last_updated.getTime(),
+		);
 
 		return json({
 			username,

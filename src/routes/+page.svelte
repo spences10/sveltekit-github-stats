@@ -12,13 +12,8 @@
 	let loading = $state(false);
 
 	$effect(() => {
-		const today = new Date().toISOString().split('T')[0];
-		if (date_option === 'today') {
-			since = today;
-			until = today;
-		} else if (date_option === 'year') {
-			since = `${year}-01-01`;
-			until = `${year}-12-31`;
+		if (form?.username) {
+			username = form.username;
 		}
 	});
 
@@ -38,7 +33,7 @@
 	use:enhance={() => {
 		loading = true;
 		return async ({ update }) => {
-			await update();
+			await update({ reset: false });
 			loading = false;
 		};
 	}}

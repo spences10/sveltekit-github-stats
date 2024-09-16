@@ -1,44 +1,61 @@
-# create-svelte
+# GitHub Contribution Tracker
 
-Everything you need to build a Svelte project, powered by
-[`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+A web application to track and visualize GitHub contributions for a
+specified user and date range.
 
-## Creating a project
+Demo:
+[https://sveltekit-github-stats.vercel.app/](https://sveltekit-github-stats.vercel.app/)
 
-If you're seeing this, you've probably already done this step.
-Congrats!
+## Technologies Used
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+- [Svelte 5](https://svelte.dev/blog/svelte-5-preview) - The next
+  major version of the Svelte framework
+- [SvelteKit](https://kit.svelte.dev/) - The official Svelte
+  application framework
+- [TypeScript](https://www.typescriptlang.org/) - Typed superset of
+  JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+  framework
+- [DaisyUI](https://daisyui.com/) - Tailwind CSS component library
+- [GitHub API](https://docs.github.com/en/rest) - For fetching user
+  contribution data
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Features
 
-## Developing
+- Fetch GitHub contributions for a specified username
+- Filter contributions by date range (today, specific year, or custom
+  range)
+- Display total commit count and list of contributed repositories
+- Sort repositories by most recently updated
+- Responsive design with DaisyUI components
+- Loading spinner for better user experience during data fetching
 
-Once you've created a project and installed dependencies with
-`npm install` (or `pnpm install` or `yarn`), start a development
-server:
+## Getting Started
 
-```bash
-npm run dev
+1. Clone the repository:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+   ```bash
+   git clone https://github.com/yourusername/github-contribution-tracker.git
+   ```
 
-## Building
+2. Install dependencies:
 
-To create a production version of your app:
+   ```bash
+   cd github-contribution-tracker
+   npm install
+   ```
 
-```bash
-npm run build
-```
+3. Create a `.env` file in the root directory and add your GitHub
+   token:
 
-You can preview the production build with `npm run preview`.
+   ```env
+   GITHUB_TOKEN=your_github_token_here
+   ```
 
-> To deploy your app, you may need to install an
-> [adapter](https://kit.svelte.dev/docs/adapters) for your target
-> environment.
+4. Start the development server:
+
+   ```bash
+   pnpm run dev
+   ```
+
+5. Open your browser and navigate to `http://localhost:5173`

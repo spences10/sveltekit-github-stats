@@ -33,8 +33,11 @@ describe('Page server actions', () => {
 
 		const mock_request = {
 			formData: vi.fn().mockResolvedValue({
-				get: (key: string) =>
-					key === 'username' ? 'testuser' : null,
+				get: (key: string) => {
+					if (key === 'username') return 'testuser';
+					if (key === 'date_option') return 'today';
+					return null;
+				},
 			}),
 		};
 
@@ -87,8 +90,11 @@ describe('Page server actions', () => {
 
 		const mock_request = {
 			formData: vi.fn().mockResolvedValue({
-				get: (key: string) =>
-					key === 'username' ? 'testuser' : null,
+				get: (key: string) => {
+					if (key === 'username') return 'testuser';
+					if (key === 'date_option') return 'today';
+					return null;
+				},
 			}),
 		};
 
@@ -99,7 +105,7 @@ describe('Page server actions', () => {
 
 		expect(result).toEqual({
 			status: 500,
-			data: { error: 'API Error' },
+			data: { error: 'API Error', username: 'testuser' },
 		});
 	});
 });

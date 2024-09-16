@@ -157,6 +157,10 @@
 				).toLocaleDateString()}
 			</p>
 
+			{#if form.reached_limit}
+				<p class="text-warning">{form.note}</p>
+			{/if}
+
 			<h3>Repositories Contributed To:</h3>
 			<ul>
 				{#each form.repositories as repo}
@@ -169,6 +173,12 @@
 							{repo.name}
 						</a>
 						: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
+						<br />
+						<small>
+							Last updated: {new Date(
+								repo.last_updated,
+							).toLocaleString()}
+						</small>
 					</li>
 				{/each}
 			</ul>

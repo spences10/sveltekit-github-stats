@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 
 	let { form } = $props<{ form: ActionData }>();
@@ -8,6 +9,7 @@
 	let year = $state(new Date().getFullYear().toString());
 	let since = $state('');
 	let until = $state('');
+	let loading = $state(false);
 
 	$effect(() => {
 		const today = new Date().toISOString().split('T')[0];
@@ -33,6 +35,13 @@
 	method="POST"
 	class="form-control w-full"
 	onsubmit={handle_submit}
+	use:enhance={() => {
+		loading = true;
+		return async ({ update }) => {
+			await update();
+			loading = false;
+		};
+	}}
 >
 	<label for="username" class="label">
 		<span class="label-text">GitHub Username</span>
@@ -139,53 +148,60 @@
 		</div>
 	</div>
 
-	<button type="submit" class="btn btn-primary mt-4">
+	<button
+		type="submit"
+		class="btn btn-primary mt-4"
+		disabled={loading}
+	>
+		{#if loading}
+			<span class="loading loading-spinner"></span>
+		{/if}
 		Fetch Contributions
 	</button>
 </form>
 
-<div class="prose prose-xl mt-8">
-	{#if form?.loading}
-		<p>Loading...</p>
-	{:else if form?.total_commits !== undefined}
-		<div>
-			<h2>Contributions for {form.username}</h2>
-			<p>Total Commits: {form.total_commits}</p>
-			<p>
-				Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(
-					form.until,
-				).toLocaleDateString()}
-			</p>
+{#if loading}
+	<div class="mt-8 flex items-center justify-center">
+		<span class="loading loading-spinner loading-lg"></span>
+	</div>
+{:else if form?.total_commits !== undefined}
+	<div class="prose prose-xl mt-8">
+		<h2>Contributions for {form.username}</h2>
+		<p>Total Commits: {form.total_commits}</p>
+		<p>
+			Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(
+				form.until,
+			).toLocaleDateString()}
+		</p>
 
-			{#if form.reached_limit}
-				<p class="text-warning">{form.note}</p>
-			{/if}
+		{#if form.reached_limit}
+			<p class="text-warning">{form.note}</p>
+		{/if}
 
-			<h3>Repositories Contributed To:</h3>
-			<ul>
-				{#each form.repositories as repo}
-					<li>
-						<a
-							href={repo.url}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							{repo.name}
-						</a>
-						: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
-						<br />
-						<small>
-							Last updated: {new Date(
-								repo.last_updated,
-							).toLocaleString()}
-						</small>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	{:else if form?.error}
-		<p class="text-error">{form.error}</p>
-	{:else}
-		<p>No contributions data to display.</p>
-	{/if}
-</div>
+		<h3>Repositories Contributed To:</h3>
+		<ul>
+			{#each form.repositories as repo}
+				<li>
+					<a
+						href={repo.url}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{repo.name}
+					</a>
+					: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
+					<br />
+					<small>
+						Last updated: {new Date(
+							repo.last_updated,
+						).toLocaleString()}
+					</small>
+				</li>
+			{/each}
+		</ul>
+	</div>
+{:else if form?.error}
+	<p class="mt-8 text-error">{form.error}</p>
+{:else}
+	<p>No contributions data to display.</p>
+{/if}

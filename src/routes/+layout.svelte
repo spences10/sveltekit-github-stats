@@ -21,8 +21,11 @@
 	>
 		<div>
 			<p>
-				Copyright &copy; 2017 - {new Date().getFullYear()} - All rights
-				reserved by Scott Spence
+				Copyright &copy; 2020 - {new Date().getFullYear()} - Made with
+				🤖 and ❤️ by
+				<a class="link link-primary" href="https://scottspence.com">
+					Scott Spence
+				</a>
 			</p>
 		</div>
 	</footer>

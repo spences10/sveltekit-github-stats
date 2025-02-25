@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { AdvancedOptions, FormInput } from '$lib/components';
 	import type { ActionData } from './$types';
 
 	let { form } = $props<{ form: ActionData }>();
 	let username = $state(form?.username || '');
-	let show_advanced_options = $state(false);
 	let date_option = $state('today');
 	let year = $state(new Date().getFullYear().toString());
 	let since = $state('');
@@ -40,106 +40,17 @@
 >
 	<fieldset class="fieldset">
 		<legend class="fieldset-legend">GitHub Username</legend>
-		<input
-			type="text"
-			class="input input-lg rounded-box mb-4 w-full"
-			placeholder="Enter GitHub username"
+		<FormInput
 			id="username"
 			name="username"
+			placeholder="Enter GitHub username"
+			class="input input-lg rounded-box mb-4 w-full"
 			bind:value={username}
 			required
 		/>
 	</fieldset>
 
-	<fieldset
-		class="bg-base-100 border-base-300 rounded-box collapse-arrow collapse border"
-	>
-		<input type="checkbox" />
-		<div class="collapse-title font-semibold">Advanced Options</div>
-		<div class="collapse-content text-sm space-y-2">
-			<label class="flex cursor-pointer items-center justify-between">
-				<span class="fieldset-label">Today</span>
-				<input
-					type="radio"
-					name="date_option"
-					value="today"
-					class="radio radio-sm"
-					bind:group={date_option}
-					checked
-				/>
-			</label>
-
-			<label class="flex cursor-pointer items-center justify-between">
-				<span class="fieldset-label">Specific Year</span>
-				<input
-					type="radio"
-					name="date_option"
-					value="year"
-					class="radio radio-sm"
-					bind:group={date_option}
-				/>
-			</label>
-
-			{#if date_option === 'year'}
-				<div class="mb-4">
-					<label for="year" class="fieldset-label mb-2 block"
-						>Year</label
-					>
-					<input
-						id="year"
-						name="year"
-						type="number"
-						bind:value={year}
-						placeholder="Year (e.g., 2023)"
-						min="2008"
-						max={new Date().getFullYear()}
-						class="input input-bordered w-full"
-					/>
-				</div>
-			{/if}
-
-			<label class="flex cursor-pointer items-center justify-between">
-				<span class="fieldset-label">Custom Date Range</span>
-				<input
-					type="radio"
-					name="date_option"
-					value="custom"
-					class="radio radio-sm"
-					bind:group={date_option}
-				/>
-			</label>
-
-			{#if date_option === 'custom'}
-				<div class="mb-4">
-					<label for="since" class="fieldset-label mb-2 block">
-						Since
-					</label>
-					<input
-						id="since"
-						name="since"
-						type="date"
-						bind:value={since}
-						class="input input-bordered w-full"
-						required={date_option === 'custom'}
-					/>
-				</div>
-
-				<div class="mb-4">
-					<label for="until" class="fieldset-label mb-2 block">
-						Until
-					</label>
-					<input
-						id="until"
-						name="until"
-						type="date"
-						bind:value={until}
-						class="input input-bordered w-full"
-						required={date_option === 'custom'}
-					/>
-				</div>
-			{/if}
-		</div>
-	</fieldset>
+	<AdvancedOptions bind:date_option bind:year bind:since bind:until />
 
 	<button
 		type="submit"

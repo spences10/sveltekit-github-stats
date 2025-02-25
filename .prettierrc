@@ -6,7 +6,6 @@
 	"proseWrap": "always",
 	"plugins": [
 		"prettier-plugin-svelte",
-
 		"prettier-plugin-tailwindcss"
 	],
 	"overrides": [

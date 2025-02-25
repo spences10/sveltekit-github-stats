@@ -28,7 +28,7 @@
 
 <form
 	method="POST"
-	class="form-control w-full"
+	class="w-full"
 	onsubmit={handle_submit}
 	use:enhance={() => {
 		loading = true;
@@ -38,56 +38,53 @@
 		};
 	}}
 >
-	<label for="username" class="label">
-		<span class="label-text">GitHub Username</span>
-	</label>
-	<input
-		id="username"
-		name="username"
-		bind:value={username}
-		placeholder="Enter GitHub username"
-		required
-		class="input input-bordered w-full"
-	/>
+	<fieldset class="fieldset">
+		<legend class="fieldset-legend">GitHub Username</legend>
+		<input
+			type="text"
+			class="input input-lg rounded-box mb-4 w-full"
+			placeholder="Enter GitHub username"
+			id="username"
+			name="username"
+			bind:value={username}
+			required
+		/>
+	</fieldset>
 
-	<div class="divider">Advanced Options</div>
+	<div
+		class="bg-base-100 border-base-300 rounded-box collapse-arrow collapse border"
+	>
+		<input type="checkbox" />
+		<div class="collapse-title font-semibold">Advanced Options</div>
+		<div class="collapse-content text-sm space-y-2">
+			<label class="flex cursor-pointer items-center justify-between">
+				<span class="fieldset-label">Today</span>
+				<input
+					type="radio"
+					name="date_option"
+					value="today"
+					class="radio radio-sm"
+					bind:group={date_option}
+					checked
+				/>
+			</label>
 
-	<div class="collapse collapse-plus bg-base-200">
-		<input type="checkbox" bind:checked={show_advanced_options} />
-		<div class="collapse-title text-xl font-medium">
-			Show Advanced Options
-		</div>
-		<div class="collapse-content">
-			<div class="form-control">
-				<label class="label cursor-pointer">
-					<span class="label-text">Today</span>
-					<input
-						type="radio"
-						name="date_option"
-						value="today"
-						class="radio"
-						bind:group={date_option}
-						checked
-					/>
-				</label>
-			</div>
-			<div class="form-control">
-				<label class="label cursor-pointer">
-					<span class="label-text">Specific Year</span>
-					<input
-						type="radio"
-						name="date_option"
-						value="year"
-						class="radio"
-						bind:group={date_option}
-					/>
-				</label>
-			</div>
+			<label class="flex cursor-pointer items-center justify-between">
+				<span class="fieldset-label">Specific Year</span>
+				<input
+					type="radio"
+					name="date_option"
+					value="year"
+					class="radio radio-sm"
+					bind:group={date_option}
+				/>
+			</label>
+
 			{#if date_option === 'year'}
-				<div class="form-control">
-					<label for="year" class="label">
-						<span class="label-text">Year</span>
-					</label>
+				<div class="mb-4">
+					<label for="year" class="fieldset-label mb-2 block"
+						>Year</label
+					>
 					<input
 						id="year"
 						name="year"
@@ -100,22 +97,22 @@
 					/>
 				</div>
 			{/if}
-			<div class="form-control">
-				<label class="label cursor-pointer">
-					<span class="label-text">Custom Date Range</span>
-					<input
-						type="radio"
-						name="date_option"
-						value="custom"
-						class="radio"
-						bind:group={date_option}
-					/>
-				</label>
-			</div>
+
+			<label class="flex cursor-pointer items-center justify-between">
+				<span class="fieldset-label">Custom Date Range</span>
+				<input
+					type="radio"
+					name="date_option"
+					value="custom"
+					class="radio radio-sm"
+					bind:group={date_option}
+				/>
+			</label>
+
 			{#if date_option === 'custom'}
-				<div class="form-control">
-					<label for="since" class="label">
-						<span class="label-text">Since</span>
+				<div class="mb-4">
+					<label for="since" class="fieldset-label mb-2 block">
+						Since
 					</label>
 					<input
 						id="since"
@@ -126,9 +123,10 @@
 						required={date_option === 'custom'}
 					/>
 				</div>
-				<div class="form-control">
-					<label for="until" class="label">
-						<span class="label-text">Until</span>
+
+				<div class="mb-4">
+					<label for="until" class="fieldset-label mb-2 block">
+						Until
 					</label>
 					<input
 						id="until"
@@ -145,7 +143,7 @@
 
 	<button
 		type="submit"
-		class="btn btn-primary mt-4"
+		class="btn btn-lg btn-primary rounded-box mt-4 w-full"
 		disabled={loading}
 	>
 		{#if loading}
@@ -196,7 +194,7 @@
 		</ul>
 	</div>
 {:else if form?.error}
-	<p class="mt-8 text-error">{form.error}</p>
+	<p class="text-error mt-8">{form.error}</p>
 {:else}
 	<p>No contributions data to display.</p>
 {/if}

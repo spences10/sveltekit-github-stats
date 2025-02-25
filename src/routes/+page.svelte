@@ -51,7 +51,7 @@
 		/>
 	</fieldset>
 
-	<div
+	<fieldset
 		class="bg-base-100 border-base-300 rounded-box collapse-arrow collapse border"
 	>
 		<input type="checkbox" />
@@ -139,7 +139,7 @@
 				</div>
 			{/if}
 		</div>
-	</div>
+	</fieldset>
 
 	<button
 		type="submit"

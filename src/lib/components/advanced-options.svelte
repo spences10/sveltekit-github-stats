@@ -12,7 +12,7 @@
 </script>
 
 <fieldset
-	class="bg-base-100 border-base-300 rounded-box collapse-arrow collapse border"
+	class="collapse-arrow collapse rounded-box border border-base-300 bg-base-100"
 >
 	<input type="checkbox" />
 	<div class="collapse-title font-semibold">Advanced Options</div>

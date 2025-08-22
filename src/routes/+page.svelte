@@ -1,50 +1,65 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { AdvancedOptions, FormInput } from '$lib/components';
-	import type { ActionData } from './$types';
+	import { get_github_stats } from '$lib/github.remote';
+	import type { PageData } from './$types';
 
-	let { form } = $props<{ form: ActionData }>();
-	let username = $state(form?.username || '');
-	let date_option = $state('today');
+	let { data } = $props<{ data: PageData }>();
+
+	let username = $state('');
+	let date_option = $state(data.initial_date_option);
 	let year = $state(new Date().getFullYear().toString());
-	let since = $state('');
-	let until = $state('');
-	let loading = $state(false);
+	let since = $state(data.initial_date || '');
+	let until = $state(data.initial_date || '');
+	let query_params = $state<{
+		username: string;
+		since: string;
+		until: string;
+	} | null>(null);
 
-	$effect(() => {
-		if (form?.username) {
-			username = form.username;
+	// Create the query object when we have params
+	const github_query = $derived(
+		query_params ? get_github_stats(query_params) : null,
+	);
+
+	const calculate_dates = () => {
+		let calculated_since: string, calculated_until: string;
+
+		if (date_option === 'today') {
+			const today = new Date().toISOString().split('T')[0];
+			calculated_since = today;
+			calculated_until = today;
+		} else if (date_option === 'year') {
+			calculated_since = `${year}-01-01`;
+			calculated_until = `${year}-12-31`;
+		} else {
+			calculated_since = since;
+			calculated_until = until;
 		}
-	});
+
+		return { calculated_since, calculated_until };
+	};
 
 	const handle_submit = (event: Event) => {
-		const form = event.target as HTMLFormElement;
-		if (date_option === 'today' || date_option === 'year') {
-			form.since.value = since;
-			form.until.value = until;
-		}
+		event.preventDefault();
+		if (!username.trim()) return;
+
+		const { calculated_since, calculated_until } = calculate_dates();
+		query_params = {
+			username: username.trim(),
+			since: calculated_since,
+			until: calculated_until,
+		};
 	};
 </script>
 
-<form
-	method="POST"
-	class="w-full"
-	onsubmit={handle_submit}
-	use:enhance={() => {
-		loading = true;
-		return async ({ update }) => {
-			await update({ reset: false });
-			loading = false;
-		};
-	}}
->
+<form class="w-full" onsubmit={handle_submit}>
 	<fieldset class="fieldset">
 		<legend class="fieldset-legend">GitHub Username</legend>
 		<FormInput
 			id="username"
 			name="username"
 			placeholder="Enter GitHub username"
-			class="input input-lg rounded-box mb-4 w-full"
+			class="input input-lg mb-4 w-full rounded-box"
 			bind:value={username}
 			required
 		/>
@@ -54,58 +69,71 @@
 
 	<button
 		type="submit"
-		class="btn btn-lg btn-primary rounded-box mt-4 w-full"
-		disabled={loading}
+		class="btn mt-4 w-full rounded-box btn-lg btn-primary"
+		disabled={github_query?.loading}
 	>
-		{#if loading}
-			<span class="loading loading-spinner"></span>
-		{/if}
 		Fetch Contributions
 	</button>
 </form>
 
-{#if loading}
-	<div class="mt-8 flex items-center justify-center">
-		<span class="loading loading-spinner loading-lg"></span>
-	</div>
-{:else if form?.total_commits !== undefined}
-	<div class="prose prose-xl mt-8">
-		<h2>Contributions for {form.username}</h2>
-		<p>Total Commits: {form.total_commits}</p>
-		<p>
-			Date Range: {new Date(form.since).toLocaleDateString()} - {new Date(
-				form.until,
-			).toLocaleDateString()}
-		</p>
+<svelte:boundary>
+	{#if github_query}
+		{#if github_query.error}
+			<div class="mt-8">
+				<p class="text-error">Error: {github_query.error.message}</p>
+			</div>
+		{:else if github_query.loading}
+			<div class="mt-8 flex items-center justify-center">
+				<span class="loading loading-lg loading-spinner"></span>
+			</div>
+		{:else if github_query.current}
+			<div class="prose prose-xl mt-8">
+				<h2>Contributions for {github_query.current.username}</h2>
+				<p>Total Commits: {github_query.current.total_commits}</p>
+				<p>
+					Date Range: {new Date(
+						github_query.current.since,
+					).toLocaleDateString()} - {new Date(
+						github_query.current.until,
+					).toLocaleDateString()}
+				</p>
 
-		{#if form.reached_limit}
-			<p class="text-warning">{form.note}</p>
+				{#if github_query.current.reached_limit}
+					<p class="text-warning">{github_query.current.note}</p>
+				{/if}
+
+				<h3>Repositories Contributed To:</h3>
+				<ul>
+					{#each github_query.current.repositories as repo}
+						<li>
+							<a
+								href={repo.url}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{repo.name}
+							</a>
+							: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
+							<br />
+							<small>
+								Last updated: {new Date(
+									repo.last_updated,
+								).toLocaleString()}
+							</small>
+						</li>
+					{/each}
+				</ul>
+			</div>
 		{/if}
+	{:else}
+		<p class="mt-8">
+			Enter a GitHub username and fetch contributions data.
+		</p>
+	{/if}
 
-		<h3>Repositories Contributed To:</h3>
-		<ul>
-			{#each form.repositories as repo}
-				<li>
-					<a
-						href={repo.url}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{repo.name}
-					</a>
-					: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
-					<br />
-					<small>
-						Last updated: {new Date(
-							repo.last_updated,
-						).toLocaleString()}
-					</small>
-				</li>
-			{/each}
-		</ul>
-	</div>
-{:else if form?.error}
-	<p class="text-error mt-8">{form.error}</p>
-{:else}
-	<p>No contributions data to display.</p>
-{/if}
+	{#snippet pending()}
+		<div class="mt-8 flex items-center justify-center">
+			<span class="loading loading-lg loading-spinner"></span>
+		</div>
+	{/snippet}
+</svelte:boundary>

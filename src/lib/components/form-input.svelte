@@ -22,7 +22,7 @@
 
 {#if label}
 	<div class="mb-4">
-		<label for={id} class="fieldset-label mb-2 block">{label}</label>
+		<label for={id} class="mb-2 fieldset-label block">{label}</label>
 		<input
 			{id}
 			{name}

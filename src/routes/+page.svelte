@@ -1,6 +1,14 @@
 <script lang="ts">
-	import { AdvancedOptions, FormInput } from '$lib/components';
+	import {
+		AdvancedOptions,
+		CommitDistributionChart,
+		FormInput,
+		LoadingSkeleton,
+		RepositoryContributionChart,
+		StatsOverview,
+	} from '$lib/components';
 	import { get_github_stats } from '$lib/github.remote';
+	import { AlertCircle, AlertTriangle, Rocket } from '$lib/icons';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
@@ -80,55 +88,63 @@
 	{#if github_query}
 		{#if github_query.error}
 			<div class="mt-8">
-				<p class="text-error">Error: {github_query.error.message}</p>
+				<div class="alert alert-error">
+					<AlertCircle class_names="h-6 w-6 shrink-0" />
+					<span>Error: {github_query.error.message}</span>
+				</div>
 			</div>
 		{:else if github_query.loading}
-			<div class="mt-8 flex items-center justify-center">
-				<span class="loading loading-lg loading-spinner"></span>
-			</div>
+			<LoadingSkeleton />
 		{:else if github_query.current}
-			<div class="prose prose-xl mt-8">
-				<h2>Contributions for {github_query.current.username}</h2>
-				<p>Total Commits: {github_query.current.total_commits}</p>
-				<p>
-					Date Range: {new Date(
-						github_query.current.since,
-					).toLocaleDateString()} - {new Date(
-						github_query.current.until,
-					).toLocaleDateString()}
-				</p>
+			<div class="mt-8 space-y-6">
+				<!-- Header -->
+				<div class="text-center">
+					<h2 class="mb-2 text-3xl font-bold">
+						📊 GitHub Stats for
+						<span class="text-primary"
+							>{github_query.current.username}</span
+						>
+					</h2>
+					<p class="text-base-content/60">
+						{new Date(
+							github_query.current.since,
+						).toLocaleDateString()} -
+						{new Date(
+							github_query.current.until,
+						).toLocaleDateString()}
+					</p>
+				</div>
 
 				{#if github_query.current.reached_limit}
-					<p class="text-warning">{github_query.current.note}</p>
+					<div class="alert alert-warning">
+						<AlertTriangle class_names="h-6 w-6 shrink-0" />
+						<span>{github_query.current.note}</span>
+					</div>
 				{/if}
 
-				<h3>Repositories Contributed To:</h3>
-				<ul>
-					{#each github_query.current.repositories as repo}
-						<li>
-							<a
-								href={repo.url}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								{repo.name}
-							</a>
-							: {repo.commits} commit{repo.commits !== 1 ? 's' : ''}
-							<br />
-							<small>
-								Last updated: {new Date(
-									repo.last_updated,
-								).toLocaleString()}
-							</small>
-						</li>
-					{/each}
-				</ul>
+				<!-- Stats Overview -->
+				<StatsOverview stats={github_query.current} />
+
+				<!-- Charts Grid -->
+				<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+					<RepositoryContributionChart stats={github_query.current} />
+					<CommitDistributionChart stats={github_query.current} />
+				</div>
 			</div>
 		{/if}
 	{:else}
-		<p class="mt-8">
-			Enter a GitHub username and fetch contributions data.
-		</p>
+		<div class="mt-8 py-12 text-center">
+			<div class="mb-4">
+				<Rocket class_names="h-16 w-16 mx-auto text-primary" />
+			</div>
+			<h2 class="mb-2 text-2xl font-bold">
+				Ready to Explore GitHub Stats?
+			</h2>
+			<p class="text-base-content/60">
+				Enter a GitHub username above to view detailed contribution
+				analytics and visualizations.
+			</p>
+		</div>
 	{/if}
 
 	{#snippet pending()}

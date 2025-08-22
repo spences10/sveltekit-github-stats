@@ -1,5 +1,6 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { ThemeToggle } from '$lib/components';
 	import '../app.css';
 
 	let { children } = $props();
@@ -12,8 +13,13 @@
 <div class="flex min-h-screen flex-col bg-base-200">
 	<main class="flex flex-grow items-center justify-center p-4">
 		<div
-			class="container mx-auto max-w-3xl rounded-box bg-base-100 p-8 shadow-xl"
+			class="relative container mx-auto max-w-6xl rounded-box bg-base-100 p-8 shadow-xl"
 		>
+			<!-- Theme Toggle -->
+			<div class="absolute top-4 right-4">
+				<ThemeToggle />
+			</div>
+
 			<h1 class="mb-8 text-center text-3xl font-bold">
 				GitHub Contribution Tracker
 			</h1>

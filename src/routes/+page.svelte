@@ -4,6 +4,7 @@
 		CommitDistributionChart,
 		FormInput,
 		LoadingSkeleton,
+		QuickDateOptions,
 		RepositoryContributionChart,
 		StatsOverview,
 	} from '$lib/components';
@@ -36,6 +37,38 @@
 			const today = new Date().toISOString().split('T')[0];
 			calculated_since = today;
 			calculated_until = today;
+		} else if (date_option === 'this_week') {
+			const today = new Date();
+			const day_of_week = today.getDay();
+			const days_since_monday =
+				day_of_week === 0 ? 6 : day_of_week - 1; // Sunday = 0, so 6 days since Monday
+
+			const start_of_week = new Date(today);
+			start_of_week.setDate(today.getDate() - days_since_monday); // Monday
+			const end_of_week = new Date(start_of_week);
+			end_of_week.setDate(start_of_week.getDate() + 6); // Sunday
+			calculated_since = start_of_week.toISOString().split('T')[0];
+			calculated_until = end_of_week.toISOString().split('T')[0];
+		} else if (date_option === 'this_month') {
+			const today = new Date();
+			const start_of_month = new Date(
+				today.getFullYear(),
+				today.getMonth(),
+				1,
+			);
+			const end_of_month = new Date(
+				today.getFullYear(),
+				today.getMonth() + 1,
+				0,
+			);
+			calculated_since = start_of_month.toISOString().split('T')[0];
+			calculated_until = end_of_month.toISOString().split('T')[0];
+		} else if (date_option === 'this_year') {
+			const today = new Date();
+			const start_of_year = new Date(today.getFullYear(), 0, 1);
+			const end_of_year = new Date(today.getFullYear(), 11, 31);
+			calculated_since = start_of_year.toISOString().split('T')[0];
+			calculated_until = end_of_year.toISOString().split('T')[0];
 		} else if (date_option === 'year') {
 			calculated_since = `${year}-01-01`;
 			calculated_until = `${year}-12-31`;
@@ -45,6 +78,12 @@
 		}
 
 		return { calculated_since, calculated_until };
+	};
+
+	const handle_quick_date_select = (
+		option: 'today' | 'this_week' | 'this_month' | 'this_year',
+	) => {
+		date_option = option;
 	};
 
 	const handle_submit = (event: Event) => {
@@ -72,6 +111,11 @@
 			required
 		/>
 	</fieldset>
+
+	<QuickDateOptions
+		on_quick_date_select={handle_quick_date_select}
+		bind:current_date_option={date_option}
+	/>
 
 	<AdvancedOptions bind:date_option bind:year bind:since bind:until />
 

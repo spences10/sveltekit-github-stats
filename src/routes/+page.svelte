@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import {
 		AdvancedOptions,
 		CommitDistributionChart,
@@ -10,6 +11,7 @@
 	} from '$lib/components';
 	import { get_github_stats } from '$lib/github.remote';
 	import { AlertCircle, AlertTriangle, Rocket } from '$lib/icons';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
@@ -90,6 +92,11 @@
 		event.preventDefault();
 		if (!username.trim()) return;
 
+		// Save username to localStorage for future visits
+		if (browser) {
+			localStorage.setItem('github_username', username.trim());
+		}
+
 		const { calculated_since, calculated_until } = calculate_dates();
 		query_params = {
 			username: username.trim(),
@@ -97,6 +104,16 @@
 			until: calculated_until,
 		};
 	};
+
+	// Load saved username on mount
+	onMount(() => {
+		if (browser) {
+			const saved_username = localStorage.getItem('github_username');
+			if (saved_username) {
+				username = saved_username;
+			}
+		}
+	});
 </script>
 
 <form class="w-full" onsubmit={handle_submit}>

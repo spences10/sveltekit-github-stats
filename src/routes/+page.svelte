@@ -25,6 +25,7 @@
 		username: string;
 		since: string;
 		until: string;
+		timestamp: number;
 	} | null>(null);
 
 	// Create the query object when we have params
@@ -102,6 +103,7 @@
 			username: username.trim(),
 			since: calculated_since,
 			until: calculated_until,
+			timestamp: Date.now(),
 		};
 	};
 

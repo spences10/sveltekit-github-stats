@@ -23,6 +23,7 @@ const github_params_schema = v.object({
 	username: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	since: v.pipe(v.string(), v.isoDate()),
 	until: v.pipe(v.string(), v.isoDate()),
+	timestamp: v.number(),
 });
 
 type repo_contribution = v.InferOutput<

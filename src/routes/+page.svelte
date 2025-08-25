@@ -40,6 +40,12 @@
 			const today = new Date().toISOString().split('T')[0];
 			calculated_since = today;
 			calculated_until = today;
+		} else if (date_option === 'yesterday') {
+			const yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			const yesterday_iso = yesterday.toISOString().split('T')[0];
+			calculated_since = yesterday_iso;
+			calculated_until = yesterday_iso;
 		} else if (date_option === 'this_week') {
 			const today = new Date();
 			const day_of_week = today.getDay();
@@ -84,7 +90,12 @@
 	};
 
 	const handle_quick_date_select = (
-		option: 'today' | 'this_week' | 'this_month' | 'this_year',
+		option:
+			| 'today'
+			| 'yesterday'
+			| 'this_week'
+			| 'this_month'
+			| 'this_year',
 	) => {
 		date_option = option;
 	};

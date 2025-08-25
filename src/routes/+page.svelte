@@ -89,19 +89,7 @@
 		return { calculated_since, calculated_until };
 	};
 
-	const handle_quick_date_select = (
-		option:
-			| 'today'
-			| 'yesterday'
-			| 'this_week'
-			| 'this_month'
-			| 'this_year',
-	) => {
-		date_option = option;
-	};
-
-	const handle_submit = (event: Event) => {
-		event.preventDefault();
+	const fetch_contributions = () => {
 		if (!username.trim()) return;
 
 		// Save username to localStorage for future visits
@@ -116,6 +104,23 @@
 			until: calculated_until,
 			timestamp: Date.now(),
 		};
+	};
+
+	const handle_quick_date_select = (
+		option:
+			| 'today'
+			| 'yesterday'
+			| 'this_week'
+			| 'this_month'
+			| 'this_year',
+	) => {
+		date_option = option;
+		fetch_contributions();
+	};
+
+	const handle_submit = (event: Event) => {
+		event.preventDefault();
+		fetch_contributions();
 	};
 
 	// Load saved username on mount

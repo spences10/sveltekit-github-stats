@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import {
+		ActivityHeatmap,
+		ActivityLineChart,
 		AdvancedOptions,
 		CommitDistributionChart,
 		FormInput,
@@ -203,6 +205,18 @@
 
 				<!-- Stats Overview -->
 				<StatsOverview stats={github_query.current} />
+
+				<!-- Activity Charts -->
+				{#if github_query.current.daily_commits.length > 0}
+					<div class="grid grid-cols-1 gap-6">
+						<ActivityLineChart
+							daily_commits={github_query.current.daily_commits}
+						/>
+						<ActivityHeatmap
+							daily_commits={github_query.current.daily_commits}
+						/>
+					</div>
+				{/if}
 
 				<!-- Charts Grid -->
 				<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

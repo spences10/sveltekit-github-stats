@@ -9,12 +9,18 @@ const repo_contribution_schema = v.object({
 	last_updated: v.string(), // Accept any string for datetime, will be validated by Date constructor
 });
 
+const daily_commit_schema = v.object({
+	date: v.string(),
+	count: v.number(),
+});
+
 const github_stats_schema = v.object({
 	username: v.string(),
 	total_commits: v.number(),
 	since: v.string(),
 	until: v.string(),
 	repositories: v.array(repo_contribution_schema),
+	daily_commits: v.array(daily_commit_schema),
 	reached_limit: v.boolean(),
 	note: v.nullable(v.string()),
 });
@@ -29,6 +35,7 @@ const github_params_schema = v.object({
 type repo_contribution = v.InferOutput<
 	typeof repo_contribution_schema
 >;
+type daily_commit = v.InferOutput<typeof daily_commit_schema>;
 export type github_stats_result = v.InferOutput<
 	typeof github_stats_schema
 >;
@@ -102,6 +109,22 @@ export const get_github_stats = query(
 				return acc;
 			}, {});
 
+			// Aggregate commits by date (YYYY-MM-DD)
+			const daily_counts = all_items.reduce<Record<string, number>>(
+				(acc, item) => {
+					const date = item.commit.author.date.split('T')[0];
+					acc[date] = (acc[date] || 0) + 1;
+					return acc;
+				},
+				{},
+			);
+
+			const daily_commits: daily_commit[] = Object.entries(
+				daily_counts,
+			)
+				.map(([date, count]) => ({ date, count }))
+				.sort((a, b) => a.date.localeCompare(b.date));
+
 			const sorted_repositories = Object.values(
 				repo_contributions,
 			).sort(
@@ -116,6 +139,7 @@ export const get_github_stats = query(
 				since,
 				until,
 				repositories: sorted_repositories,
+				daily_commits,
 				reached_limit,
 				note: reached_limit
 					? 'Due to GitHub API limitations, only the first 1000 results are shown. The total commit count and repository list may be incomplete for large date ranges.'

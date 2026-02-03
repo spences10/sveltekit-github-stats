@@ -1,3 +1,5 @@
+export { default as ActivityHeatmap } from './activity-heatmap.svelte';
+export { default as ActivityLineChart } from './activity-line-chart.svelte';
 export { default as AdvancedOptions } from './advanced-options.svelte';
 export { default as CommitDistributionChart } from './commit-distribution-chart.svelte';
 export { default as DateRange } from './date-range.svelte';

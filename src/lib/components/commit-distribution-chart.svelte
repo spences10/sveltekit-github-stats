@@ -1,44 +1,78 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import type { github_stats_result } from '$lib/github.remote';
 	import { Chevron } from '$lib/icons';
+	import { PieChart } from 'layerchart';
+	import { onMount } from 'svelte';
 
-	let { stats } = $props<{ stats: github_stats_result }>();
+	let { stats }: { stats: github_stats_result } = $props();
 
-	let sort_order: 'desc' | 'asc' = $state('desc'); // Default to highest first
+	let sort_order: 'desc' | 'asc' = $state('desc');
 
-	const pie_data = $derived(() => {
-		const data = stats.repositories.map(
-			(repo: { name: string; commits: number }, index: number) => ({
+	// Track theme for reactive styling
+	let current_theme = $state('light');
+
+	onMount(() => {
+		if (browser) {
+			current_theme =
+				document.documentElement.getAttribute('data-theme') ||
+				'light';
+			const observer = new MutationObserver(() => {
+				current_theme =
+					document.documentElement.getAttribute('data-theme') ||
+					'light';
+			});
+			observer.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ['data-theme'],
+			});
+			return () => observer.disconnect();
+		}
+	});
+
+	type PieDataItem = {
+		key: string;
+		label: string;
+		value: number;
+		percentage: number;
+	};
+
+	// Theme-aware colors
+	const get_colors = (theme: string) => {
+		const is_dark = theme === 'dark';
+		return is_dark
+			? [
+					'oklch(0.70 0.20 260)', // primary blue
+					'oklch(0.75 0.18 320)', // secondary purple
+					'oklch(0.78 0.16 231)', // info cyan
+					'oklch(0.78 0.19 142)', // success green
+					'oklch(0.85 0.18 84)', // warning yellow
+					'oklch(0.72 0.20 27)', // danger/error orange
+				]
+			: [
+					'oklch(0.55 0.20 260)', // primary blue
+					'oklch(0.60 0.18 320)', // secondary purple
+					'oklch(0.62 0.16 231)', // info cyan
+					'oklch(0.62 0.19 142)', // success green
+					'oklch(0.70 0.18 84)', // warning yellow
+					'oklch(0.55 0.20 27)', // danger/error orange
+				];
+	};
+
+	const pie_data = $derived.by(() => {
+		const data: PieDataItem[] = stats.repositories.map(
+			(repo: { name: string; commits: number }) => ({
+				key: repo.name,
 				label: repo.name.split('/').pop() || repo.name,
 				value: repo.commits,
 				percentage: (repo.commits / stats.total_commits) * 100,
-				color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`, // Golden angle for better color distribution
 			}),
 		);
 
-		// Sort by commits based on sort_order
-		return data.sort((a: { value: number }, b: { value: number }) =>
+		return data.sort((a, b) =>
 			sort_order === 'desc' ? b.value - a.value : a.value - b.value,
 		);
 	});
-
-	const radius = 80;
-	const center = 100;
-
-	const get_path = (percentage: number, offset: number) => {
-		const angle = (percentage / 100) * 2 * Math.PI;
-		const start_angle = (offset / 100) * 2 * Math.PI - Math.PI / 2;
-		const end_angle = start_angle + angle;
-
-		const x1 = center + radius * Math.cos(start_angle);
-		const y1 = center + radius * Math.sin(start_angle);
-		const x2 = center + radius * Math.cos(end_angle);
-		const y2 = center + radius * Math.sin(end_angle);
-
-		const large_arc = angle > Math.PI ? 1 : 0;
-
-		return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${large_arc} 1 ${x2} ${y2} Z`;
-	};
 
 	const toggle_sort = () => {
 		sort_order = sort_order === 'desc' ? 'asc' : 'desc';
@@ -68,59 +102,27 @@
 		</div>
 
 		<div class="mt-4 flex flex-col gap-6 lg:flex-row">
-			<!-- Pie Chart -->
-			<div class="flex justify-center">
-				<svg viewBox="0 0 200 200" class="h-48 w-48">
-					{#each pie_data() as segment, index}
-						{@const offset = pie_data()
-							.slice(0, index)
-							.reduce(
-								(sum: number, s: { percentage: number }) =>
-									sum + s.percentage,
-								0,
-							)}
-						<path
-							d={get_path(segment.percentage, offset)}
-							fill={segment.color}
-							stroke="white"
-							stroke-width="2"
-							class="cursor-pointer transition-opacity hover:opacity-80"
-						>
-							<title
-								>{segment.label}: {segment.value} commits ({segment.percentage.toFixed(
-									1,
-								)}%)</title
-							>
-						</path>
-					{/each}
-
-					<!-- Center text -->
-					<text
-						x={center}
-						y={center - 10}
-						text-anchor="middle"
-						class="fill-base-content text-lg font-bold"
-					>
-						{stats.total_commits}
-					</text>
-					<text
-						x={center}
-						y={center + 10}
-						text-anchor="middle"
-						class="fill-base-content/60 text-sm"
-					>
-						commits
-					</text>
-				</svg>
+			<div class="flex h-48 w-48 justify-center">
+				<PieChart
+					data={pie_data}
+					key="key"
+					label="label"
+					value="value"
+					legend={false}
+					innerRadius={0.5}
+					padAngle={0.02}
+				/>
 			</div>
 
-			<!-- Legend -->
 			<div class="flex-1 space-y-2">
-				{#each pie_data() as segment}
+				{#each pie_data as segment, index}
+					{@const colors = get_colors(current_theme)}
 					<div class="flex items-center gap-3">
 						<div
 							class="h-4 w-4 flex-shrink-0 rounded-full"
-							style="background-color: {segment.color}"
+							style="background-color: {colors[
+								index % colors.length
+							]}"
 						></div>
 						<div class="min-w-0 flex-1">
 							<div
@@ -138,6 +140,10 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+
+		<div class="mt-2 text-center text-sm text-base-content/60">
+			Total: {stats.total_commits} commits
 		</div>
 	</div>
 </div>

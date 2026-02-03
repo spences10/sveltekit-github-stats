@@ -1,8 +1,88 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@plugin "daisyui" {
+@plugin 'daisyui' {
 	themes:
 		light --default,
 		dark --prefersdark;
+}
+
+/* Smooth theme transitions for all elements */
+html {
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
+}
+
+/* Chart transitions */
+.card {
+	transition:
+		background-color 0.3s ease,
+		box-shadow 0.3s ease;
+}
+
+svg rect,
+svg path,
+svg circle {
+	transition:
+		fill 0.3s ease,
+		stroke 0.3s ease,
+		opacity 0.2s ease;
+}
+
+/* Chart entrance animation */
+@keyframes chart-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.card {
+	animation: chart-fade-in 0.4s ease-out;
+}
+
+/* Staggered animation for grid items */
+.grid > .card:nth-child(1) {
+	animation-delay: 0s;
+}
+.grid > .card:nth-child(2) {
+	animation-delay: 0.1s;
+}
+.grid > .card:nth-child(3) {
+	animation-delay: 0.2s;
+}
+.grid > .card:nth-child(4) {
+	animation-delay: 0.3s;
+}
+
+/* LayerChart tooltip theme support */
+:root {
+	--chart-primary: oklch(0.65 0.2 260);
+	--chart-secondary: oklch(0.7 0.18 320);
+	--chart-success: oklch(0.72 0.19 142);
+	--chart-info: oklch(0.72 0.16 231);
+	--chart-warning: oklch(0.8 0.18 84);
+	--chart-error: oklch(0.65 0.2 27);
+	--chart-grid: oklch(0.85 0 0);
+	--chart-axis: oklch(0.5 0 0);
+}
+
+[data-theme='dark'] {
+	--chart-grid: oklch(0.35 0 0);
+	--chart-axis: oklch(0.65 0 0);
+}
+
+/* Responsive chart sizing */
+@media (max-width: 640px) {
+	.card .h-64 {
+		height: 12rem;
+	}
+	.card .h-48 {
+		height: 10rem;
+	}
 }

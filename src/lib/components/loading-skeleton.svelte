@@ -20,13 +20,51 @@
 		{/each}
 	</div>
 
-	<!-- Charts Skeleton -->
-	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-		<!-- Activity Chart Skeleton -->
+	<!-- Activity Charts Skeleton -->
+	<div class="grid grid-cols-1 gap-6">
+		<!-- Line Chart Skeleton -->
 		<div class="card bg-base-100 shadow-xl">
 			<div class="card-body">
-				<div class="mb-4 h-6 w-32 skeleton"></div>
+				<div class="mb-4 h-6 w-48 skeleton"></div>
+				<div class="h-64 w-full skeleton"></div>
+			</div>
+		</div>
+
+		<!-- Heatmap Skeleton -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="mb-4 h-6 w-40 skeleton"></div>
 				<div class="h-32 w-full skeleton"></div>
+				<div class="mt-4 flex justify-end gap-2">
+					<div class="h-3 w-8 skeleton"></div>
+					<div class="flex gap-1">
+						{#each Array(5) as _}
+							<div class="h-3 w-3 skeleton rounded-sm"></div>
+						{/each}
+					</div>
+					<div class="h-3 w-8 skeleton"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Charts Skeleton -->
+	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+		<!-- Repository Contribution Skeleton -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="mb-4 h-6 w-48 skeleton"></div>
+				<div class="space-y-3">
+					{#each Array(5) as _}
+						<div class="space-y-1">
+							<div class="flex justify-between">
+								<div class="h-4 w-32 skeleton"></div>
+								<div class="h-4 w-16 skeleton"></div>
+							</div>
+							<div class="h-2 w-full skeleton rounded-full"></div>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 
@@ -45,18 +83,6 @@
 						{/each}
 					</div>
 				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Repository Cards Skeleton -->
-	<div class="card bg-base-100 shadow-xl">
-		<div class="card-body">
-			<div class="mb-4 h-6 w-32 skeleton"></div>
-			<div class="space-y-4">
-				{#each Array(6) as _}
-					<div class="h-20 w-full skeleton rounded-lg"></div>
-				{/each}
 			</div>
 		</div>
 	</div>

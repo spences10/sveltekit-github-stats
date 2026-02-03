@@ -1,45 +1,99 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import type { github_stats_result } from '$lib/github.remote';
 	import { Chevron } from '$lib/icons';
+	import { scaleBand, scaleOrdinal } from 'd3-scale';
+	import {
+		Axis,
+		Bars,
+		Chart,
+		Highlight,
+		Svg,
+		Tooltip,
+	} from 'layerchart';
+	import { onMount } from 'svelte';
 
-	let { stats } = $props<{ stats: github_stats_result }>();
+	let { stats }: { stats: github_stats_result } = $props();
 
-	let sort_order: 'desc' | 'asc' = $state('desc'); // Default to highest first
+	let sort_order: 'desc' | 'asc' = $state('desc');
 
-	// Create repository contribution bars (all repos)
-	const repo_data = $derived(() => {
+	// Track theme for reactive styling
+	let current_theme = $state('light');
+
+	onMount(() => {
+		if (browser) {
+			current_theme =
+				document.documentElement.getAttribute('data-theme') ||
+				'light';
+			const observer = new MutationObserver(() => {
+				current_theme =
+					document.documentElement.getAttribute('data-theme') ||
+					'light';
+			});
+			observer.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ['data-theme'],
+			});
+			return () => observer.disconnect();
+		}
+	});
+
+	type RepoData = {
+		name: string;
+		full_name: string;
+		commits: number;
+		url: string;
+		color: string;
+	};
+
+	const get_bar_color = (
+		commits: number,
+		max_commits: number,
+		theme: string,
+	): string => {
+		const percentage = (commits / max_commits) * 100;
+		const is_dark = theme === 'dark';
+		// Adjust lightness for dark theme
+		if (percentage >= 80)
+			return is_dark
+				? 'oklch(0.75 0.19 142)'
+				: 'oklch(0.65 0.19 142)'; // success green
+		if (percentage >= 60)
+			return is_dark
+				? 'oklch(0.75 0.16 231)'
+				: 'oklch(0.65 0.16 231)'; // info blue
+		if (percentage >= 40)
+			return is_dark ? 'oklch(0.82 0.18 84)' : 'oklch(0.72 0.18 84)'; // warning yellow
+		return is_dark ? 'oklch(0.70 0.20 27)' : 'oklch(0.60 0.20 27)'; // error/orange
+	};
+
+	const repo_data = $derived.by(() => {
 		const all_repos = stats.repositories;
 		const max_commits = Math.max(
-			...all_repos.map((repo: { commits: number }) => repo.commits),
+			...all_repos.map((repo) => repo.commits),
 			1,
 		);
 
-		const mapped_repos = all_repos.map(
-			(repo: { name: string; commits: number; url: string }) => ({
-				name: repo.name.split('/').pop() || repo.name,
-				full_name: repo.name,
-				commits: repo.commits,
-				percentage: (repo.commits / max_commits) * 100,
-				url: repo.url,
-			}),
-		);
+		const mapped_repos: RepoData[] = all_repos.map((repo) => ({
+			name: repo.name.split('/').pop() || repo.name,
+			full_name: repo.name,
+			commits: repo.commits,
+			url: repo.url,
+			color: get_bar_color(repo.commits, max_commits, current_theme),
+		}));
 
-		// Sort by commits based on sort_order
-		return mapped_repos.sort(
-			(a: { commits: number }, b: { commits: number }) =>
-				sort_order === 'desc'
-					? b.commits - a.commits
-					: a.commits - b.commits,
+		return mapped_repos.sort((a, b) =>
+			sort_order === 'desc'
+				? b.commits - a.commits
+				: a.commits - b.commits,
 		);
 	});
 
-	const get_bar_color = (commits: number, max_commits: number) => {
-		const percentage = (commits / max_commits) * 100;
-		if (percentage >= 80) return 'bg-success';
-		if (percentage >= 60) return 'bg-info';
-		if (percentage >= 40) return 'bg-warning';
-		return 'bg-error/60';
-	};
+	const color_scale = $derived(
+		scaleOrdinal<string, string>()
+			.domain(repo_data.map((d) => d.name))
+			.range(repo_data.map((d) => d.color)),
+	);
 
 	const toggle_sort = () => {
 		sort_order = sort_order === 'desc' ? 'asc' : 'desc';
@@ -68,34 +122,47 @@
 			</button>
 		</div>
 
-		<div class="mt-4 space-y-3">
-			{#each repo_data() as repo}
-				<div class="space-y-1">
-					<div class="flex items-center justify-between">
-						<a
-							href={repo.url}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="max-w-[60%] truncate text-sm font-medium transition-colors hover:text-primary"
-							title={repo.full_name}
-						>
-							{repo.name}
-						</a>
-						<span class="text-xs text-base-content/60">
-							{repo.commits} commit{repo.commits !== 1 ? 's' : ''}
-						</span>
-					</div>
-					<div class="h-2 w-full rounded-full bg-base-200">
-						<div
-							class="h-2 rounded-full transition-all duration-300 {get_bar_color(
-								repo.commits,
-								repo_data()[0]?.commits || 1,
-							)}"
-							style="width: {repo.percentage}%"
-						></div>
-					</div>
-				</div>
-			{/each}
+		<div
+			class="mt-4"
+			style="height: {Math.max(repo_data.length * 36, 200)}px;"
+		>
+			<Chart
+				data={repo_data}
+				x="commits"
+				xDomain={[0, null]}
+				xNice
+				y="name"
+				yScale={scaleBand().padding(0.3)}
+				c="name"
+				cScale={color_scale}
+				padding={{ left: 120, bottom: 24, right: 16 }}
+				tooltip={{ mode: 'band' }}
+			>
+				<Svg>
+					<Axis placement="bottom" grid rule />
+					<Axis placement="left" rule />
+					<Bars radius={4} />
+					<Highlight area />
+				</Svg>
+
+				<Tooltip.Root>
+					{#snippet children({ data }: { data: RepoData })}
+						<Tooltip.Header>
+							<a
+								href={data.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="hover:underline"
+							>
+								{data.full_name}
+							</a>
+						</Tooltip.Header>
+						<Tooltip.List>
+							<Tooltip.Item label="Commits" value={data.commits} />
+						</Tooltip.List>
+					{/snippet}
+				</Tooltip.Root>
+			</Chart>
 		</div>
 	</div>
 </div>

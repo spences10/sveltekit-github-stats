@@ -14,6 +14,11 @@ const daily_commit_schema = v.object({
 	count: v.number(),
 });
 
+const hourly_commit_schema = v.object({
+	hour: v.number(),
+	count: v.number(),
+});
+
 const github_stats_schema = v.object({
 	username: v.string(),
 	total_commits: v.number(),
@@ -21,6 +26,7 @@ const github_stats_schema = v.object({
 	until: v.string(),
 	repositories: v.array(repo_contribution_schema),
 	daily_commits: v.array(daily_commit_schema),
+	hourly_commits: v.array(hourly_commit_schema),
 	reached_limit: v.boolean(),
 	note: v.nullable(v.string()),
 });
@@ -36,6 +42,7 @@ type repo_contribution = v.InferOutput<
 	typeof repo_contribution_schema
 >;
 type daily_commit = v.InferOutput<typeof daily_commit_schema>;
+type hourly_commit = v.InferOutput<typeof hourly_commit_schema>;
 export type github_stats_result = v.InferOutput<
 	typeof github_stats_schema
 >;
@@ -125,6 +132,26 @@ export const get_github_stats = query(
 				.map(([date, count]) => ({ date, count }))
 				.sort((a, b) => a.date.localeCompare(b.date));
 
+			// Aggregate commits by hour (0-23)
+			const hourly_counts = all_items.reduce<Record<number, number>>(
+				(acc, item) => {
+					const hour = new Date(
+						item.commit.author.date,
+					).getUTCHours();
+					acc[hour] = (acc[hour] || 0) + 1;
+					return acc;
+				},
+				{},
+			);
+
+			const hourly_commits: hourly_commit[] = Array.from(
+				{ length: 24 },
+				(_, hour) => ({
+					hour,
+					count: hourly_counts[hour] || 0,
+				}),
+			);
+
 			const sorted_repositories = Object.values(
 				repo_contributions,
 			).sort(
@@ -140,6 +167,7 @@ export const get_github_stats = query(
 				until,
 				repositories: sorted_repositories,
 				daily_commits,
+				hourly_commits,
 				reached_limit,
 				note: reached_limit
 					? 'Due to GitHub API limitations, only the first 1000 results are shown. The total commit count and repository list may be incomplete for large date ranges.'

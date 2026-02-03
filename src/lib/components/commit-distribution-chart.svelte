@@ -47,7 +47,7 @@
 					'oklch(0.78 0.16 231)', // info cyan
 					'oklch(0.78 0.19 142)', // success green
 					'oklch(0.85 0.18 84)', // warning yellow
-					'oklch(0.72 0.20 27)', // danger/error orange
+					'oklch(0.72 0.20 27)', // error orange
 				]
 			: [
 					'oklch(0.55 0.20 260)', // primary blue
@@ -55,7 +55,7 @@
 					'oklch(0.62 0.16 231)', // info cyan
 					'oklch(0.62 0.19 142)', // success green
 					'oklch(0.70 0.18 84)', // warning yellow
-					'oklch(0.55 0.20 27)', // danger/error orange
+					'oklch(0.55 0.20 27)', // error orange
 				];
 	};
 
@@ -119,7 +119,7 @@
 					{@const colors = get_colors(current_theme)}
 					<div class="flex items-center gap-3">
 						<div
-							class="h-4 w-4 flex-shrink-0 rounded-full"
+							class="h-4 w-4 shrink-0 rounded-full"
 							style="background-color: {colors[
 								index % colors.length
 							]}"

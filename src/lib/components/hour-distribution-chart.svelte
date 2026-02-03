@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { github_stats_result } from '$lib/github.remote';
-	import { Chevron } from '$lib/icons';
 	import { scaleBand } from 'd3-scale';
 	import {
 		Axis,
@@ -15,9 +14,6 @@
 
 	let { stats }: { stats: github_stats_result } = $props();
 
-	let sort_order: 'desc' | 'asc' = $state('desc');
-
-	// Track theme for reactive styling
 	let current_theme = $state('light');
 
 	onMount(() => {
@@ -38,11 +34,16 @@
 		}
 	});
 
-	type RepoData = {
-		name: string;
-		full_name: string;
-		commits: number;
-		url: string;
+	const format_hour = (hour: number): string => {
+		if (hour === 0) return '12am';
+		if (hour === 12) return '12pm';
+		return hour < 12 ? `${hour}am` : `${hour - 12}pm`;
+	};
+
+	type HourData = {
+		hour: number;
+		label: string;
+		count: number;
 		color: string;
 	};
 
@@ -68,66 +69,42 @@
 				];
 	};
 
-	const repo_data = $derived.by(() => {
-		const all_repos = stats.repositories;
+	const hour_data = $derived.by(() => {
+		const with_commits = stats.hourly_commits.filter(
+			(h) => h.count > 0,
+		);
 		const colors = get_colors(current_theme);
 
-		const sorted_repos = [...all_repos].sort((a, b) =>
-			sort_order === 'desc'
-				? b.commits - a.commits
-				: a.commits - b.commits,
-		);
-
-		return sorted_repos.map((repo, index) => ({
-			name: repo.name.split('/').pop() || repo.name,
-			full_name: repo.name,
-			commits: repo.commits,
-			url: repo.url,
+		return with_commits.map((h, index) => ({
+			hour: h.hour,
+			label: format_hour(h.hour),
+			count: h.count,
 			color: colors[index % colors.length],
 		}));
 	});
-
-	const toggle_sort = () => {
-		sort_order = sort_order === 'desc' ? 'asc' : 'desc';
-	};
 </script>
 
 <div class="card bg-base-100 shadow-xl">
 	<div class="card-body">
-		<div class="flex items-center justify-between">
-			<h3 class="card-title">
-				<span class="text-primary">📊</span>
-				Repository Contributions
-			</h3>
-			<button
-				class="btn btn-ghost btn-sm"
-				onclick={toggle_sort}
-				title={sort_order === 'desc'
-					? 'Sort ascending'
-					: 'Sort descending'}
-			>
-				<Chevron
-					height="16px"
-					width="16px"
-					rotated={sort_order === 'desc'}
-				/>
-			</button>
-		</div>
+		<h3 class="card-title">
+			<span class="text-primary">🕐</span>
+			Commits by Hour (UTC)
+		</h3>
 
 		<div
 			class="mt-4"
-			style="height: {Math.max(repo_data.length * 36, 200)}px;"
+			style="height: {Math.max(hour_data.length * 28, 120)}px;"
 		>
 			<Chart
-				data={repo_data}
-				x="commits"
+				data={hour_data}
+				x="count"
 				xDomain={[0, null]}
 				xNice
-				y="name"
-				yScale={scaleBand().padding(0.3)}
-				c="name"
-				cRange={repo_data.map((d) => d.color)}
-				padding={{ left: 120, bottom: 24, right: 16 }}
+				y="label"
+				yScale={scaleBand().padding(0.2)}
+				c="label"
+				cRange={hour_data.map((d) => d.color)}
+				padding={{ left: 48, bottom: 24, right: 16 }}
 				tooltip={{ mode: 'band' }}
 			>
 				<Svg>
@@ -138,19 +115,10 @@
 				</Svg>
 
 				<Tooltip.Root>
-					{#snippet children({ data }: { data: RepoData })}
-						<Tooltip.Header>
-							<a
-								href={data.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="hover:underline"
-							>
-								{data.full_name}
-							</a>
-						</Tooltip.Header>
+					{#snippet children({ data }: { data: HourData })}
+						<Tooltip.Header>{data.label}</Tooltip.Header>
 						<Tooltip.List>
-							<Tooltip.Item label="Commits" value={data.commits} />
+							<Tooltip.Item label="Commits" value={data.count} />
 						</Tooltip.List>
 					{/snippet}
 				</Tooltip.Root>

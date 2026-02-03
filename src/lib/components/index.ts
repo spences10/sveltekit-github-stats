@@ -1,9 +1,8 @@
-export { default as ActivityHeatmap } from './activity-heatmap.svelte';
-export { default as ActivityLineChart } from './activity-line-chart.svelte';
 export { default as AdvancedOptions } from './advanced-options.svelte';
 export { default as CommitDistributionChart } from './commit-distribution-chart.svelte';
 export { default as DateRange } from './date-range.svelte';
 export { default as FormInput } from './form-input.svelte';
+export { default as HourDistributionChart } from './hour-distribution-chart.svelte';
 export { default as LoadingSkeleton } from './loading-skeleton.svelte';
 export { default as QuickDateOptions } from './quick-date-options.svelte';
 export { default as RadioOption } from './radio-option.svelte';

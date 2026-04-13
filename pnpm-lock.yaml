@@ -60,8 +60,8 @@ importers:
         specifier: ^17.3.0
         version: 17.4.0
       layerchart:
-        specifier: 2.0.0-next.50
-        version: 2.0.0-next.50(@sveltejs/kit@2.56.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.1)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)(typescript@6.0.2)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)
+        specifier: 2.0.0-next.54
+        version: 2.0.0-next.54(@sveltejs/kit@2.56.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.1)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)(typescript@6.0.2)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)
       playwright:
         specifier: ^1.58.1
         version: 1.59.1
@@ -1200,8 +1200,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  layerchart@2.0.0-next.50:
-    resolution: {integrity: sha512-1I2q0oOZO0qQG8tugZcRHsKAygFOZNmzbQMKGvcq9w1k5dvVPEab2Lsgd6qw0u0j1plYk+XvtGHo8OcCPidCFw==}
+  layerchart@2.0.0-next.54:
+    resolution: {integrity: sha512-2bkRffzCfFTYavoo85W0GJ3VwfslFwWVMxXocjFYc6GokHmDL2UkuFi03T3LasKQMJOF6Xyuko6YAJM8FIy8zg==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -2774,7 +2774,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  layerchart@2.0.0-next.50(@sveltejs/kit@2.56.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.1)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)(typescript@6.0.2)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1):
+  layerchart@2.0.0-next.54(@sveltejs/kit@2.56.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.1)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1)(typescript@6.0.2)(vite@7.3.1(jiti@2.6.1)(lightningcss@1.32.0)))(svelte@5.55.1):
     dependencies:
       '@dagrejs/dagre': 2.0.4
       '@layerstack/svelte-actions': 1.0.1-next.18

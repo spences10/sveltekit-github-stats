@@ -1,5 +1,5 @@
 import { query } from '$app/server';
-import { GITHUB_TOKEN } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import * as v from 'valibot';
 
 const repo_contribution_schema = v.object({
@@ -77,12 +77,17 @@ export const get_github_stats = query(
 		let reached_limit = false;
 
 		try {
+			const github_token = env.GITHUB_TOKEN;
+			if (!github_token) {
+				throw new Error('GITHUB_TOKEN is not configured.');
+			}
+
 			for (let page = 1; page <= 10; page++) {
 				const api_url = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}&sort=author-date&order=desc&per_page=${per_page}&page=${page}`;
 
 				const response = await fetch(api_url, {
 					headers: {
-						Authorization: `token ${GITHUB_TOKEN}`,
+						Authorization: `token ${github_token}`,
 						Accept: 'application/vnd.github.v3+json',
 					},
 				});

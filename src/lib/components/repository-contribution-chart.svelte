@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
 	import type { github_stats_result } from '$lib/github.remote';
 	import { Chevron } from '$lib/icons';
 	import { scaleBand } from 'd3-scale';
@@ -11,32 +13,10 @@
 		Svg,
 		Tooltip,
 	} from 'layerchart';
-	import { onMount } from 'svelte';
 
 	let { stats }: { stats: github_stats_result } = $props();
 
 	let sort_order: 'desc' | 'asc' = $state('desc');
-
-	// Track theme for reactive styling
-	let current_theme = $state('light');
-
-	onMount(() => {
-		if (browser) {
-			current_theme =
-				document.documentElement.getAttribute('data-theme') ||
-				'light';
-			const observer = new MutationObserver(() => {
-				current_theme =
-					document.documentElement.getAttribute('data-theme') ||
-					'light';
-			});
-			observer.observe(document.documentElement, {
-				attributes: true,
-				attributeFilter: ['data-theme'],
-			});
-			return () => observer.disconnect();
-		}
-	});
 
 	type RepoData = {
 		name: string;
@@ -46,33 +26,16 @@
 		color: string;
 	};
 
-	// Same colors as pie chart
-	const get_colors = (theme: string) => {
-		const is_dark = theme === 'dark';
-		return is_dark
-			? [
-					'oklch(0.70 0.20 260)', // primary blue
-					'oklch(0.75 0.18 320)', // secondary purple
-					'oklch(0.78 0.16 231)', // info cyan
-					'oklch(0.78 0.19 142)', // success green
-					'oklch(0.85 0.18 84)', // warning yellow
-					'oklch(0.72 0.20 27)', // error orange
-				]
-			: [
-					'oklch(0.55 0.20 260)', // primary blue
-					'oklch(0.60 0.18 320)', // secondary purple
-					'oklch(0.62 0.16 231)', // info cyan
-					'oklch(0.62 0.19 142)', // success green
-					'oklch(0.70 0.18 84)', // warning yellow
-					'oklch(0.55 0.20 27)', // error orange
-				];
-	};
+	const colors = [
+		'var(--chart-1)',
+		'var(--chart-2)',
+		'var(--chart-3)',
+		'var(--chart-4)',
+		'var(--chart-5)',
+	];
 
 	const repo_data = $derived.by(() => {
-		const all_repos = stats.repositories;
-		const colors = get_colors(current_theme);
-
-		const sorted_repos = [...all_repos].sort((a, b) =>
+		const sorted_repos = [...stats.repositories].sort((a, b) =>
 			sort_order === 'desc'
 				? b.commits - a.commits
 				: a.commits - b.commits,
@@ -92,15 +55,19 @@
 	};
 </script>
 
-<div class="card bg-base-100 shadow-xl">
-	<div class="card-body">
-		<div class="flex items-center justify-between">
-			<h3 class="card-title">
-				<span class="text-primary">📊</span>
-				Repository Contributions
-			</h3>
-			<button
-				class="btn btn-ghost btn-sm"
+<Card.Root class="chart-panel reveal-up">
+	<Card.Header class="flex-row items-start justify-between gap-4">
+		<div>
+			<Card.Title>Repository focus</Card.Title>
+			<Card.Description>
+				Where the selected commits landed.
+			</Card.Description>
+		</div>
+		<div class="flex items-center gap-2">
+			<Badge variant="secondary">{repo_data.length} repos</Badge>
+			<Button
+				variant="ghost"
+				size="icon"
 				onclick={toggle_sort}
 				title={sort_order === 'desc'
 					? 'Sort ascending'
@@ -111,50 +78,59 @@
 					width="16px"
 					rotated={sort_order === 'desc'}
 				/>
-			</button>
+			</Button>
 		</div>
+	</Card.Header>
 
-		<div
-			class="mt-4"
-			style="height: {Math.max(repo_data.length * 36, 200)}px;"
-		>
-			<Chart
-				data={repo_data}
-				x="commits"
-				xDomain={[0, null]}
-				xNice
-				y="name"
-				yScale={scaleBand().padding(0.3)}
-				c="name"
-				cRange={repo_data.map((d) => d.color)}
-				padding={{ left: 120, bottom: 24, right: 16 }}
-				tooltip={{ mode: 'band' }}
+	<Card.Content>
+		{#if repo_data.length}
+			<div style="height: {Math.max(repo_data.length * 34, 220)}px;">
+				<Chart
+					data={repo_data}
+					x="commits"
+					xDomain={[0, null]}
+					xNice
+					y="name"
+					yScale={scaleBand().padding(0.28)}
+					c="name"
+					cRange={repo_data.map((d) => d.color)}
+					padding={{ left: 118, bottom: 28, right: 14, top: 8 }}
+					tooltipContext={{ mode: 'band' }}
+				>
+					<Svg>
+						<Axis placement="bottom" grid rule />
+						<Axis placement="left" rule />
+						<Bars radius={6} />
+						<Highlight area />
+					</Svg>
+
+					<Tooltip.Root>
+						{#snippet children({ data }: { data: RepoData })}
+							<Tooltip.Header>
+								<!-- eslint-disable svelte/no-navigation-without-resolve -->
+								<a
+									href={data.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="hover:underline"
+								>
+									{data.full_name}
+								</a>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
+							</Tooltip.Header>
+							<Tooltip.List>
+								<Tooltip.Item label="Commits" value={data.commits} />
+							</Tooltip.List>
+						{/snippet}
+					</Tooltip.Root>
+				</Chart>
+			</div>
+		{:else}
+			<div
+				class="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground"
 			>
-				<Svg>
-					<Axis placement="bottom" grid rule />
-					<Axis placement="left" rule />
-					<Bars radius={4} />
-					<Highlight area />
-				</Svg>
-
-				<Tooltip.Root>
-					{#snippet children({ data }: { data: RepoData })}
-						<Tooltip.Header>
-							<a
-								href={data.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="hover:underline"
-							>
-								{data.full_name}
-							</a>
-						</Tooltip.Header>
-						<Tooltip.List>
-							<Tooltip.Item label="Commits" value={data.commits} />
-						</Tooltip.List>
-					{/snippet}
-				</Tooltip.Root>
-			</Chart>
-		</div>
-	</div>
-</div>
+				No repository activity found for this range.
+			</div>
+		{/if}
+	</Card.Content>
+</Card.Root>

@@ -1,5 +1,5 @@
 import { query } from '$app/server';
-import { GITHUB_TOKEN } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import * as v from 'valibot';
 
 const repo_contribution_schema = v.object({
@@ -48,6 +48,23 @@ export type github_stats_result = v.InferOutput<
 >;
 export type github_params = v.InferInput<typeof github_params_schema>;
 
+type github_commit_search_item = {
+	repository: {
+		full_name: string;
+		html_url: string;
+	};
+	commit: {
+		author: {
+			date: string;
+		};
+	};
+};
+
+type github_commit_search_response = {
+	items: github_commit_search_item[];
+	total_count: number;
+};
+
 // Export the query function directly with validation schema
 export const get_github_stats = query(
 	github_params_schema,
@@ -55,17 +72,22 @@ export const get_github_stats = query(
 		const { username, since, until } = params;
 
 		const per_page = 100;
-		let all_items: any[] = [];
+		let all_items: github_commit_search_item[] = [];
 		let total_count = 0;
 		let reached_limit = false;
 
 		try {
+			const github_token = env.GITHUB_TOKEN;
+			if (!github_token) {
+				throw new Error('GITHUB_TOKEN is not configured.');
+			}
+
 			for (let page = 1; page <= 10; page++) {
 				const api_url = `https://api.github.com/search/commits?q=author:${username}+author-date:${since}..${until}&sort=author-date&order=desc&per_page=${per_page}&page=${page}`;
 
 				const response = await fetch(api_url, {
 					headers: {
-						Authorization: `token ${GITHUB_TOKEN}`,
+						Authorization: `token ${github_token}`,
 						Accept: 'application/vnd.github.v3+json',
 					},
 				});
@@ -82,7 +104,8 @@ export const get_github_stats = query(
 					);
 				}
 
-				const data = await response.json();
+				const data =
+					(await response.json()) as github_commit_search_response;
 				all_items = all_items.concat(data.items);
 				total_count = Math.min(data.total_count, 1000);
 
@@ -180,7 +203,9 @@ export const get_github_stats = query(
 			if (error instanceof Error) {
 				throw error;
 			}
-			throw new Error('An error occurred while fetching data');
+			throw new Error('An error occurred while fetching data', {
+				cause: error,
+			});
 		}
 	},
 );

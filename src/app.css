@@ -1,88 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&display=swap');
+@import url('https://rsms.me/inter/inter.css');
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@plugin 'daisyui' {
-	themes:
-		light --default,
-		dark --prefersdark;
+
+@custom-variant dark (&:is(.dark *, [data-theme='dark'] *));
+
+@theme inline {
+	--font-sans: var(--font-sans);
+	--font-display: var(--font-display);
+	--font-mono: var(--font-mono);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
 }
 
-/* Smooth theme transitions for all elements */
-html {
-	transition:
-		background-color 0.3s ease,
-		color 0.3s ease;
+:root {
+	color-scheme: light;
+	--font-sans:
+		'InterVariable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-display:
+		'Mona Sans', 'InterVariable', 'Inter', ui-sans-serif, system-ui,
+		sans-serif;
+	--font-mono:
+		'SFMono-Regular', 'Cascadia Code', ui-monospace, monospace;
+	--radius: 0.875rem;
+	--background: oklch(0.985 0.01 88);
+	--foreground: oklch(0.19 0.031 72);
+	--card: oklch(0.998 0.006 88);
+	--card-foreground: var(--foreground);
+	--popover: var(--card);
+	--popover-foreground: var(--foreground);
+	--primary: oklch(0.47 0.142 142);
+	--primary-foreground: oklch(0.985 0.012 92);
+	--secondary: oklch(0.93 0.028 84);
+	--secondary-foreground: oklch(0.28 0.041 76);
+	--muted: oklch(0.92 0.025 84);
+	--muted-foreground: oklch(0.49 0.033 74);
+	--accent: oklch(0.82 0.142 86);
+	--accent-foreground: oklch(0.25 0.052 69);
+	--destructive: oklch(0.56 0.19 28);
+	--destructive-foreground: oklch(0.985 0.012 92);
+	--border: oklch(0.86 0.026 82);
+	--input: oklch(0.89 0.025 82);
+	--ring: oklch(0.59 0.13 142);
+	--chart-1: oklch(0.56 0.151 142);
+	--chart-2: oklch(0.66 0.13 82);
+	--chart-3: oklch(0.57 0.137 43);
+	--chart-4: oklch(0.5 0.115 225);
+	--chart-5: oklch(0.61 0.16 18);
 }
 
-/* Chart transitions */
-.card {
-	transition:
-		background-color 0.3s ease,
-		box-shadow 0.3s ease;
+.dark,
+[data-theme='dark'] {
+	color-scheme: dark;
+	--background: oklch(0.165 0.024 76);
+	--foreground: oklch(0.94 0.018 82);
+	--card: oklch(0.22 0.03 76);
+	--card-foreground: var(--foreground);
+	--popover: var(--card);
+	--popover-foreground: var(--foreground);
+	--primary: oklch(0.72 0.16 142);
+	--primary-foreground: oklch(0.17 0.026 76);
+	--secondary: oklch(0.28 0.033 76);
+	--secondary-foreground: oklch(0.91 0.018 82);
+	--muted: oklch(0.27 0.028 76);
+	--muted-foreground: oklch(0.72 0.021 82);
+	--accent: oklch(0.69 0.145 86);
+	--accent-foreground: oklch(0.18 0.026 76);
+	--destructive: oklch(0.7 0.17 28);
+	--destructive-foreground: oklch(0.17 0.026 76);
+	--border: oklch(0.34 0.035 76);
+	--input: oklch(0.32 0.034 76);
+	--ring: oklch(0.68 0.14 142);
+	--chart-1: oklch(0.72 0.16 142);
+	--chart-2: oklch(0.78 0.13 86);
+	--chart-3: oklch(0.7 0.14 43);
+	--chart-4: oklch(0.67 0.13 225);
+	--chart-5: oklch(0.72 0.16 18);
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+
+	html {
+		@apply scroll-smooth bg-background text-foreground;
+	}
+
+	body {
+		@apply min-h-dvh bg-background font-sans text-foreground antialiased;
+		background-image:
+			radial-gradient(
+				circle at top left,
+				color-mix(in oklch, var(--primary) 14%, transparent),
+				transparent 32rem
+			),
+			radial-gradient(
+				circle at 85% 12%,
+				color-mix(in oklch, var(--accent) 20%, transparent),
+				transparent 28rem
+			),
+			linear-gradient(
+				135deg,
+				color-mix(in oklch, var(--background) 90%, var(--card)),
+				var(--background)
+			);
+	}
+}
+
+@layer components {
+	.title-font {
+		font-family: var(--font-display);
+		font-variation-settings: 'wdth' 112.5;
+	}
+
+	.metric-number {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.chart-panel {
+		@apply overflow-hidden rounded-2xl border border-border/70 bg-card/85 shadow-sm backdrop-blur;
+	}
 }
 
 svg rect,
 svg path,
 svg circle {
 	transition:
-		fill 0.3s ease,
-		stroke 0.3s ease,
-		opacity 0.2s ease;
+		fill 180ms ease,
+		stroke 180ms ease,
+		opacity 180ms ease;
 }
 
-/* Chart entrance animation */
-@keyframes chart-fade-in {
+@media (prefers-reduced-motion: no-preference) {
+	.reveal-up {
+		animation: reveal-up 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	.reveal-up:nth-child(2) {
+		animation-delay: 80ms;
+	}
+
+	.reveal-up:nth-child(3) {
+		animation-delay: 140ms;
+	}
+}
+
+@keyframes reveal-up {
 	from {
 		opacity: 0;
-		transform: translateY(8px);
+		transform: translateY(12px);
 	}
 	to {
 		opacity: 1;
 		transform: translateY(0);
-	}
-}
-
-.card {
-	animation: chart-fade-in 0.4s ease-out;
-}
-
-/* Staggered animation for grid items */
-.grid > .card:nth-child(1) {
-	animation-delay: 0s;
-}
-.grid > .card:nth-child(2) {
-	animation-delay: 0.1s;
-}
-.grid > .card:nth-child(3) {
-	animation-delay: 0.2s;
-}
-.grid > .card:nth-child(4) {
-	animation-delay: 0.3s;
-}
-
-/* LayerChart tooltip theme support */
-:root {
-	--chart-primary: oklch(0.65 0.2 260);
-	--chart-secondary: oklch(0.7 0.18 320);
-	--chart-success: oklch(0.72 0.19 142);
-	--chart-info: oklch(0.72 0.16 231);
-	--chart-warning: oklch(0.8 0.18 84);
-	--chart-error: oklch(0.65 0.2 27);
-	--chart-grid: oklch(0.85 0 0);
-	--chart-axis: oklch(0.5 0 0);
-}
-
-[data-theme='dark'] {
-	--chart-grid: oklch(0.35 0 0);
-	--chart-axis: oklch(0.65 0 0);
-}
-
-/* Responsive chart sizing */
-@media (max-width: 640px) {
-	.card .h-64 {
-		height: 12rem;
-	}
-	.card .h-48 {
-		height: 10rem;
 	}
 }

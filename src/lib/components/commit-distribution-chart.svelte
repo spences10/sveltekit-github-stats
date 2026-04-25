@@ -1,149 +1,132 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
 	import type { github_stats_result } from '$lib/github.remote';
 	import { Chevron } from '$lib/icons';
 	import { PieChart } from 'layerchart';
-	import { onMount } from 'svelte';
 
 	let { stats }: { stats: github_stats_result } = $props();
 
 	let sort_order: 'desc' | 'asc' = $state('desc');
 
-	// Track theme for reactive styling
-	let current_theme = $state('light');
-
-	onMount(() => {
-		if (browser) {
-			current_theme =
-				document.documentElement.getAttribute('data-theme') ||
-				'light';
-			const observer = new MutationObserver(() => {
-				current_theme =
-					document.documentElement.getAttribute('data-theme') ||
-					'light';
-			});
-			observer.observe(document.documentElement, {
-				attributes: true,
-				attributeFilter: ['data-theme'],
-			});
-			return () => observer.disconnect();
-		}
-	});
-
-	type PieDataItem = {
-		key: string;
-		label: string;
-		value: number;
-		percentage: number;
-	};
-
-	// Theme-aware colors
-	const get_colors = (theme: string) => {
-		const is_dark = theme === 'dark';
-		return is_dark
-			? [
-					'oklch(0.70 0.20 260)', // primary blue
-					'oklch(0.75 0.18 320)', // secondary purple
-					'oklch(0.78 0.16 231)', // info cyan
-					'oklch(0.78 0.19 142)', // success green
-					'oklch(0.85 0.18 84)', // warning yellow
-					'oklch(0.72 0.20 27)', // error orange
-				]
-			: [
-					'oklch(0.55 0.20 260)', // primary blue
-					'oklch(0.60 0.18 320)', // secondary purple
-					'oklch(0.62 0.16 231)', // info cyan
-					'oklch(0.62 0.19 142)', // success green
-					'oklch(0.70 0.18 84)', // warning yellow
-					'oklch(0.55 0.20 27)', // error orange
-				];
-	};
+	const colors = [
+		'var(--chart-1)',
+		'var(--chart-2)',
+		'var(--chart-3)',
+		'var(--chart-4)',
+		'var(--chart-5)',
+	];
 
 	const pie_data = $derived.by(() => {
-		const data: PieDataItem[] = stats.repositories.map(
-			(repo: { name: string; commits: number }) => ({
+		const sorted = stats.repositories
+			.map((repo) => ({
 				key: repo.name,
 				label: repo.name.split('/').pop() || repo.name,
 				value: repo.commits,
-				percentage: (repo.commits / stats.total_commits) * 100,
-			}),
-		);
+				percentage: stats.total_commits
+					? (repo.commits / stats.total_commits) * 100
+					: 0,
+			}))
+			.sort((a, b) =>
+				sort_order === 'desc' ? b.value - a.value : a.value - b.value,
+			);
 
-		return data.sort((a, b) =>
-			sort_order === 'desc' ? b.value - a.value : a.value - b.value,
-		);
+		return sorted.map((item, index) => ({
+			...item,
+			color: colors[index % colors.length],
+		}));
 	});
+
+	const commit_label = (count: number) =>
+		count === 1 ? '1 commit' : `${count} commits`;
 
 	const toggle_sort = () => {
 		sort_order = sort_order === 'desc' ? 'asc' : 'desc';
 	};
 </script>
 
-<div class="card bg-base-100 shadow-xl">
-	<div class="card-body">
-		<div class="flex items-center justify-between">
-			<h3 class="card-title">
-				<span class="text-primary">🥧</span>
-				Commit Distribution
-			</h3>
-			<button
-				class="btn btn-ghost btn-sm"
-				onclick={toggle_sort}
-				title={sort_order === 'desc'
-					? 'Sort ascending'
-					: 'Sort descending'}
-			>
-				<Chevron
-					height="16px"
-					width="16px"
-					rotated={sort_order === 'desc'}
-				/>
-			</button>
+<Card.Root class="chart-panel reveal-up">
+	<Card.Header class="flex-row items-start justify-between gap-4">
+		<div>
+			<Card.Title>Workload share</Card.Title>
+			<Card.Description>
+				How the work split across repositories.
+			</Card.Description>
 		</div>
+		<Button
+			variant="ghost"
+			size="icon"
+			onclick={toggle_sort}
+			title={sort_order === 'desc'
+				? 'Sort ascending'
+				: 'Sort descending'}
+		>
+			<Chevron
+				height="16px"
+				width="16px"
+				rotated={sort_order === 'desc'}
+			/>
+		</Button>
+	</Card.Header>
 
-		<div class="mt-4 flex flex-col gap-6 lg:flex-row">
-			<div class="flex h-48 w-48 justify-center">
-				<PieChart
-					data={pie_data}
-					key="key"
-					label="label"
-					value="value"
-					legend={false}
-					innerRadius={0.5}
-					padAngle={0.02}
-				/>
-			</div>
+	<Card.Content>
+		{#if pie_data.length}
+			<div class="grid min-w-0 gap-6">
+				<div
+					class="mx-auto flex size-52 items-center justify-center rounded-full bg-muted/40 p-3 sm:size-56"
+				>
+					<PieChart
+						data={pie_data}
+						key="key"
+						label="label"
+						value="value"
+						c="key"
+						cRange={pie_data.map((d) => d.color)}
+						legend={false}
+						innerRadius={0.58}
+						padAngle={0.025}
+						props={{ arc: { stroke: 'var(--card)', strokeWidth: 2 } }}
+					/>
+				</div>
 
-			<div class="flex-1 space-y-2">
-				{#each pie_data as segment, index}
-					{@const colors = get_colors(current_theme)}
-					<div class="flex items-center gap-3">
+				<div class="grid min-w-0 content-start gap-2">
+					{#each pie_data.slice(0, 8) as segment (segment.key)}
 						<div
-							class="h-4 w-4 shrink-0 rounded-full"
-							style="background-color: {colors[
-								index % colors.length
-							]}"
-						></div>
-						<div class="min-w-0 flex-1">
+							class="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2"
+						>
 							<div
-								class="truncate text-sm font-medium"
-								title={segment.label}
-							>
-								{segment.label}
-							</div>
-							<div class="text-xs text-base-content/60">
-								{segment.value} commits ({segment.percentage.toFixed(
-									1,
-								)}%)
+								class="size-3 shrink-0 rounded-full"
+								style="background-color: {segment.color}"
+							></div>
+							<div class="min-w-0 flex-1">
+								<p
+									class="truncate text-sm font-medium"
+									title={segment.label}
+								>
+									{segment.label}
+								</p>
+								<p class="truncate text-sm text-muted-foreground">
+									{commit_label(segment.value)} · {segment.percentage.toFixed(
+										1,
+									)}%
+								</p>
 							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+					{#if pie_data.length > 8}
+						<Badge variant="outline" class="w-fit">
+							+{pie_data.length - 8} more repositories
+						</Badge>
+					{/if}
+				</div>
 			</div>
-		</div>
-
-		<div class="mt-2 text-center text-sm text-base-content/60">
-			Total: {stats.total_commits} commits
-		</div>
-	</div>
-</div>
+		{:else}
+			<div
+				class="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground"
+			>
+				No commits found for this range yet.
+			</div>
+		{/if}
+	</Card.Content>
+</Card.Root>

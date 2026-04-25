@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
+
 	let {
 		on_quick_date_select = $bindable(),
 		current_date_option = $bindable(),
@@ -17,26 +19,29 @@
 	const date_options = [
 		{ key: 'today', label: 'Today' },
 		{ key: 'yesterday', label: 'Yesterday' },
-		{ key: 'this_week', label: 'This Week' },
-		{ key: 'this_month', label: 'This Month' },
-		{ key: 'this_year', label: 'This Year' },
+		{ key: 'this_week', label: 'This week' },
+		{ key: 'this_month', label: 'This month' },
+		{ key: 'this_year', label: 'This year' },
 	] as const;
 </script>
 
-<fieldset class="mb-4 fieldset">
-	<legend class="fieldset-legend">Quick Date Ranges</legend>
-	<div class="join grid w-full grid-cols-2 sm:grid-cols-5">
-		{#each date_options as option}
-			<button
+<fieldset class="grid gap-2">
+	<legend class="text-sm font-medium text-muted-foreground"
+		>Quick range</legend
+	>
+	<div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+		{#each date_options as option (option.key)}
+			<Button
 				type="button"
-				class="btn join-item btn-lg {current_date_option ===
-				option.key
-					? 'btn-primary'
-					: ''}"
+				variant={current_date_option === option.key
+					? 'default'
+					: 'outline'}
+				size="lg"
+				class="h-10"
 				onclick={() => on_quick_date_select(option.key)}
 			>
 				{option.label}
-			</button>
+			</Button>
 		{/each}
 	</div>
 </fieldset>

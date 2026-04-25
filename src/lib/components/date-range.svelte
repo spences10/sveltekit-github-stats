@@ -6,17 +6,9 @@
 		until_value = $bindable(''),
 		required = false,
 	} = $props();
-
-	let since = $state(since_value);
-	let until = $state(until_value);
-
-	$effect(() => {
-		since_value = since;
-		until_value = until;
-	});
 </script>
 
-<div class="space-y-2">
+<div class="grid gap-3 sm:grid-cols-2">
 	<FormInput
 		id="since"
 		name="since"

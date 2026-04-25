@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+
 	let {
 		id,
 		name,
@@ -9,21 +12,15 @@
 		required = false,
 		min = '',
 		max = '',
-		class: class_name = 'input input-bordered w-full',
+		class: class_name = '',
 		disabled = false,
 	} = $props();
-
-	let bind_value = $state(value);
-
-	$effect(() => {
-		value = bind_value;
-	});
 </script>
 
 {#if label}
-	<div class="mb-4">
-		<label for={id} class="mb-2 fieldset-label block">{label}</label>
-		<input
+	<div class="grid gap-2">
+		<Label for={id}>{label}</Label>
+		<Input
 			{id}
 			{name}
 			{type}
@@ -37,7 +34,7 @@
 		/>
 	</div>
 {:else}
-	<input
+	<Input
 		{id}
 		{name}
 		{type}

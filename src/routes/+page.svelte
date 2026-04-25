@@ -147,31 +147,31 @@
 
 <section class="space-y-8">
 	<div
-		class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(380px,500px)] lg:items-end"
+		class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(380px,500px)] lg:items-start"
 	>
 		<div class="max-w-3xl">
 			<Badge variant="secondary" class="mb-4"
-				>Contribution analytics</Badge
+				>Public commit analytics</Badge
 			>
 			<h1
 				class="title-font text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
 			>
-				Map a GitHub contributor’s working pattern.
+				Explore public GitHub commit activity.
 			</h1>
 			<p
 				class="mt-5 max-w-[62ch] text-lg text-pretty text-muted-foreground"
 			>
-				Search a username, choose a window, and turn public commits
-				into a clear read on repository focus, throughput, and UTC
-				rhythm.
+				Search a username, choose a date range, and summarize public
+				commits by repository, volume, and UTC hour.
 			</p>
 		</div>
 
 		<Card.Root class="chart-panel">
 			<Card.Header>
-				<Card.Title>Build report</Card.Title>
+				<Card.Title>Search commits</Card.Title>
 				<Card.Description>
-					Analyze authored commits from public GitHub Search results.
+					Use a GitHub username to look up public commits for the
+					selected range.
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="pt-0">
@@ -204,7 +204,7 @@
 						class="h-11 w-full"
 						disabled={github_query?.loading}
 					>
-						{github_query?.loading ? 'Analyzing…' : 'Analyze commits'}
+						{github_query?.loading ? 'Searching…' : 'Search commits'}
 					</Button>
 				</form>
 			</Card.Content>
@@ -217,7 +217,7 @@
 				{#if github_query.error}
 					<Alert.Root variant="destructive">
 						<AlertCircle class_names="h-5 w-5" />
-						<Alert.Title>Couldn’t build the report</Alert.Title>
+						<Alert.Title>Couldn’t fetch commits</Alert.Title>
 						<Alert.Description
 							>{github_query.error.message}</Alert.Description
 						>
@@ -240,7 +240,7 @@
 								<h2
 									class="title-font truncate text-3xl font-semibold tracking-tight sm:text-4xl"
 								>
-									{github_query.current.username}'s contribution map
+									{github_query.current.username}'s public commits
 								</h2>
 							</div>
 							<p
@@ -288,13 +288,13 @@
 						<h2
 							class="title-font max-w-lg text-3xl font-semibold tracking-tight text-balance"
 						>
-							Start with a username.
+							Start with a GitHub username.
 						</h2>
 						<p
 							class="mt-3 max-w-md text-pretty text-muted-foreground"
 						>
-							Choose a GitHub handle and date range to reveal
-							repository focus, commit mix, and UTC working rhythm.
+							Choose a GitHub handle and date range to see public
+							commit totals, repository activity, and UTC timing.
 						</p>
 					</Card.Content>
 				</Card.Root>

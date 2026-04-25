@@ -58,7 +58,7 @@
 	<div class="grid grid-cols-1 @2xl:grid-cols-2 @5xl:grid-cols-4">
 		{#each cards as card (card.label)}
 			<div
-				class="min-w-0 border-border/60 py-4 not-first:border-t first:pt-0 last:pb-0 @2xl:px-5 @2xl:py-0 @5xl:mt-0 @5xl:border-t-0 @5xl:py-0 @5xl:not-first:border-l @5xl:not-first:pl-6 @5xl:not-last:pr-6 @5xl:first:pl-0 @5xl:last:pr-0 @2xl:[&:nth-child(2)]:border-t-0 @2xl:[&:nth-child(2n)]:border-l @2xl:[&:nth-child(2n)]:pl-5 @2xl:[&:nth-child(2n+1)]:pr-5 @2xl:[&:nth-child(n+3)]:mt-5 @2xl:[&:nth-child(n+3)]:border-t @2xl:[&:nth-child(n+3)]:pt-5"
+				class="min-w-0 border-border/60 py-4 not-first:border-t first:pt-0 last:pb-0 @2xl:px-5 @2xl:py-0 @2xl:nth-2:border-t-0 @2xl:nth-[2n]:border-l @2xl:nth-[2n]:pl-5 @2xl:nth-[2n+1]:pr-5 @2xl:nth-[n+3]:mt-5 @2xl:nth-[n+3]:border-t @2xl:nth-[n+3]:pt-5 @5xl:mt-0 @5xl:border-t-0 @5xl:py-0 @5xl:not-first:border-l @5xl:not-first:pl-6 @5xl:not-last:pr-6 @5xl:first:pl-0 @5xl:last:pr-0"
 			>
 				<p class="truncate text-sm font-medium text-muted-foreground">
 					{card.label}

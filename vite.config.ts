@@ -10,6 +10,7 @@ export default defineConfig({
 		singleQuote: true,
 		printWidth: 70,
 		trailingComma: 'all',
+		proseWrap: 'always',
 	},
 	lint: {
 		ignorePatterns: [

@@ -11,7 +11,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "vp check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && prettier --check \"**/*.svelte\"",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"format": "vp check --fix && prettier --write \"**/*.svelte\"",
+		"format": "vp fmt && prettier --write \"**/*.svelte\"",
 		"lint": "vp check && prettier --check \"**/*.svelte\"",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",

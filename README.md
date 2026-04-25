@@ -1,38 +1,36 @@
-# sv
+# GitHub Stats Lab
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A SvelteKit dashboard for exploring public GitHub commit activity by user and date range.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
+- SvelteKit 2 + Svelte 5
+- LayerChart for visualizations
+- shadcn-svelte components
+- Tailwind CSS v4
+- GitHub Search Commits API
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Create a `.env` file with a GitHub token:
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+GITHUB_TOKEN=github_pat_...
 ```
 
-## Building
-
-To create a production version of your app:
+Install dependencies and start the dev server:
 
 ```sh
-npm run build
+pnpm install
+pnpm dev
 ```
 
-You can preview the production build with `npm run preview`.
+## Checks
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+pnpm check
+pnpm lint
+pnpm test:unit -- --run
+pnpm test:e2e
+pnpm build
+```

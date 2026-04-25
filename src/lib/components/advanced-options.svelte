@@ -11,12 +11,20 @@
 	} = $props();
 </script>
 
-<fieldset
-	class="collapse-arrow collapse rounded-box border border-base-300 bg-base-100"
+<details
+	class="group rounded-xl border border-border/70 bg-card/70 p-4"
 >
-	<input type="checkbox" />
-	<div class="collapse-title font-semibold">Advanced Options</div>
-	<div class="collapse-content space-y-2 text-sm">
+	<summary
+		class="flex cursor-pointer list-none items-center justify-between text-sm font-medium marker:hidden"
+	>
+		<span>Advanced range</span>
+		<span
+			class="text-muted-foreground transition group-open:rotate-180"
+			>⌄</span
+		>
+	</summary>
+
+	<div class="mt-4 grid gap-3">
 		<RadioOption
 			name="date_option"
 			value="today"
@@ -24,11 +32,10 @@
 			bind:group={date_option}
 			checked={date_option === 'today'}
 		/>
-
 		<RadioOption
 			name="date_option"
 			value="year"
-			label="Specific Year"
+			label="Specific year"
 			bind:group={date_option}
 		/>
 
@@ -39,7 +46,7 @@
 				type="number"
 				label="Year"
 				bind:value={year}
-				placeholder="Year (e.g., 2023)"
+				placeholder="2026"
 				min="2008"
 				max={new Date().getFullYear().toString()}
 			/>
@@ -48,7 +55,7 @@
 		<RadioOption
 			name="date_option"
 			value="custom"
-			label="Custom Date Range"
+			label="Custom date range"
 			bind:group={date_option}
 		/>
 
@@ -60,4 +67,4 @@
 			/>
 		{/if}
 	</div>
-</fieldset>
+</details>

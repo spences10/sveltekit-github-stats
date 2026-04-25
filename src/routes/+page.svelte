@@ -10,18 +10,28 @@
 		RepositoryContributionChart,
 		StatsOverview,
 	} from '$lib/components';
+	import * as Alert from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
 	import { get_github_stats } from '$lib/github.remote';
 	import { AlertCircle, AlertTriangle, Rocket } from '$lib/icons';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
 
+	const { initial_date, initial_date_option } = untrack(() => ({
+		initial_date: data.initial_date || '',
+		initial_date_option: data.initial_date_option,
+	}));
+
 	let username = $state('');
-	let date_option = $state(data.initial_date_option);
-	let year = $state(new Date().getFullYear().toString());
-	let since = $state(data.initial_date || '');
-	let until = $state(data.initial_date || '');
+	let date_option = $state(initial_date_option);
+	let year = $state(new SvelteDate().getFullYear().toString());
+	let since = $state(initial_date);
+	let until = $state(initial_date);
 	let query_params = $state<{
 		username: string;
 		since: string;
@@ -29,56 +39,59 @@
 		timestamp: number;
 	} | null>(null);
 
-	// Create the query object when we have params
 	const github_query = $derived(
 		query_params ? get_github_stats(query_params) : null,
 	);
 
 	const calculate_dates = () => {
-		let calculated_since: string, calculated_until: string;
+		let calculated_since: string;
+		let calculated_until: string;
 
 		if (date_option === 'today') {
-			const today = new Date().toISOString().split('T')[0];
+			const today = new SvelteDate().toISOString().split('T')[0];
 			calculated_since = today;
 			calculated_until = today;
 		} else if (date_option === 'yesterday') {
-			const yesterday = new Date();
+			const yesterday = new SvelteDate();
 			yesterday.setDate(yesterday.getDate() - 1);
 			const yesterday_iso = yesterday.toISOString().split('T')[0];
 			calculated_since = yesterday_iso;
 			calculated_until = yesterday_iso;
 		} else if (date_option === 'this_week') {
-			const today = new Date();
+			const today = new SvelteDate();
 			const day_of_week = today.getDay();
 			const days_since_monday =
-				day_of_week === 0 ? 6 : day_of_week - 1; // Sunday = 0, so 6 days since Monday
-
-			const start_of_week = new Date(today);
-			start_of_week.setDate(today.getDate() - days_since_monday); // Monday
-			const end_of_week = new Date(start_of_week);
-			end_of_week.setDate(start_of_week.getDate() + 6); // Sunday
+				day_of_week === 0 ? 6 : day_of_week - 1;
+			const start_of_week = new SvelteDate(today);
+			start_of_week.setDate(today.getDate() - days_since_monday);
+			const end_of_week = new SvelteDate(start_of_week);
+			end_of_week.setDate(start_of_week.getDate() + 6);
 			calculated_since = start_of_week.toISOString().split('T')[0];
 			calculated_until = end_of_week.toISOString().split('T')[0];
 		} else if (date_option === 'this_month') {
-			const today = new Date();
-			const start_of_month = new Date(
+			const today = new SvelteDate();
+			calculated_since = new SvelteDate(
 				today.getFullYear(),
 				today.getMonth(),
 				1,
-			);
-			const end_of_month = new Date(
+			)
+				.toISOString()
+				.split('T')[0];
+			calculated_until = new SvelteDate(
 				today.getFullYear(),
 				today.getMonth() + 1,
 				0,
-			);
-			calculated_since = start_of_month.toISOString().split('T')[0];
-			calculated_until = end_of_month.toISOString().split('T')[0];
+			)
+				.toISOString()
+				.split('T')[0];
 		} else if (date_option === 'this_year') {
-			const today = new Date();
-			const start_of_year = new Date(today.getFullYear(), 0, 1);
-			const end_of_year = new Date(today.getFullYear(), 11, 31);
-			calculated_since = start_of_year.toISOString().split('T')[0];
-			calculated_until = end_of_year.toISOString().split('T')[0];
+			const today = new SvelteDate();
+			calculated_since = new SvelteDate(today.getFullYear(), 0, 1)
+				.toISOString()
+				.split('T')[0];
+			calculated_until = new SvelteDate(today.getFullYear(), 11, 31)
+				.toISOString()
+				.split('T')[0];
 		} else if (date_option === 'year') {
 			calculated_since = `${year}-01-01`;
 			calculated_until = `${year}-12-31`;
@@ -91,16 +104,16 @@
 	};
 
 	const fetch_contributions = () => {
-		if (!username.trim()) return;
+		const trimmed_username = username.trim();
+		if (!trimmed_username) return;
 
-		// Save username to localStorage for future visits
 		if (browser) {
-			localStorage.setItem('github_username', username.trim());
+			localStorage.setItem('github_username', trimmed_username);
 		}
 
 		const { calculated_since, calculated_until } = calculate_dates();
 		query_params = {
-			username: username.trim(),
+			username: trimmed_username,
 			since: calculated_since,
 			until: calculated_until,
 			timestamp: Date.now(),
@@ -124,115 +137,172 @@
 		fetch_contributions();
 	};
 
-	// Load saved username on mount
 	onMount(() => {
-		if (browser) {
-			const saved_username = localStorage.getItem('github_username');
-			if (saved_username) {
-				username = saved_username;
-			}
+		const saved_username = localStorage.getItem('github_username');
+		if (saved_username) {
+			username = saved_username;
 		}
 	});
 </script>
 
-<form class="w-full" onsubmit={handle_submit}>
-	<fieldset class="fieldset">
-		<legend class="fieldset-legend">GitHub Username</legend>
-		<FormInput
-			id="username"
-			name="username"
-			placeholder="Enter GitHub username"
-			class="input input-lg mb-4 w-full rounded-box"
-			bind:value={username}
-			required
-		/>
-	</fieldset>
-
-	<QuickDateOptions
-		on_quick_date_select={handle_quick_date_select}
-		bind:current_date_option={date_option}
-	/>
-
-	<AdvancedOptions bind:date_option bind:year bind:since bind:until />
-
-	<button
-		type="submit"
-		class="btn mt-4 w-full rounded-box btn-lg btn-primary"
-		disabled={github_query?.loading}
+<section class="space-y-8">
+	<div
+		class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(380px,500px)] lg:items-end"
 	>
-		Fetch Contributions
-	</button>
-</form>
-
-<svelte:boundary>
-	{#if github_query}
-		{#if github_query.error}
-			<div class="mt-8">
-				<div class="alert alert-error">
-					<AlertCircle class_names="h-6 w-6 shrink-0" />
-					<span>Error: {github_query.error.message}</span>
-				</div>
-			</div>
-		{:else if github_query.loading}
-			<LoadingSkeleton />
-		{:else if github_query.current}
-			<div class="mt-8 space-y-6">
-				<!-- Header -->
-				<div class="text-center">
-					<h2 class="mb-2 text-3xl font-bold">
-						📊 GitHub Stats for
-						<span class="text-primary"
-							>{github_query.current.username}</span
-						>
-					</h2>
-					<p class="text-base-content/60">
-						{new Date(
-							github_query.current.since,
-						).toLocaleDateString()} -
-						{new Date(
-							github_query.current.until,
-						).toLocaleDateString()}
-					</p>
-				</div>
-
-				{#if github_query.current.reached_limit}
-					<div class="alert alert-warning">
-						<AlertTriangle class_names="h-6 w-6 shrink-0" />
-						<span>{github_query.current.note}</span>
-					</div>
-				{/if}
-
-				<!-- Stats Overview -->
-				<StatsOverview stats={github_query.current} />
-
-				<!-- Charts Grid -->
-				<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-					<RepositoryContributionChart stats={github_query.current} />
-					<CommitDistributionChart stats={github_query.current} />
-				</div>
-
-				<!-- Hour Distribution (full width) -->
-				<HourDistributionChart stats={github_query.current} />
-			</div>
-		{/if}
-	{:else}
-		<div class="mt-8 py-12 text-center">
-			<div class="mb-4">
-				<Rocket class_names="h-16 w-16 mx-auto text-primary" />
-			</div>
-			<h2 class="mb-2 text-2xl font-bold">
-				Ready to Explore GitHub Stats?
-			</h2>
-			<p class="text-base-content/60">
-				Enter a GitHub username above to view detailed contribution
-				analytics and visualizations.
+		<div class="max-w-3xl">
+			<Badge variant="secondary" class="mb-4"
+				>Contribution analytics</Badge
+			>
+			<h1
+				class="title-font text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+			>
+				Map a GitHub contributor’s working pattern.
+			</h1>
+			<p
+				class="mt-5 max-w-[62ch] text-lg text-pretty text-muted-foreground"
+			>
+				Search a username, choose a window, and turn public commits
+				into a clear read on repository focus, throughput, and UTC
+				rhythm.
 			</p>
 		</div>
-	{/if}
 
-	{#snippet pending()}
-		<div class="mt-8 flex items-center justify-center">
-			<span class="loading loading-lg loading-spinner"></span>
+		<Card.Root class="chart-panel">
+			<Card.Header>
+				<Card.Title>Build report</Card.Title>
+				<Card.Description>
+					Analyze authored commits from public GitHub Search results.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content class="pt-0">
+				<form class="grid gap-5" onsubmit={handle_submit}>
+					<FormInput
+						id="username"
+						name="username"
+						label="GitHub username"
+						placeholder="sveltejs"
+						class="h-11 text-base"
+						bind:value={username}
+						required
+					/>
+
+					<QuickDateOptions
+						on_quick_date_select={handle_quick_date_select}
+						bind:current_date_option={date_option}
+					/>
+
+					<AdvancedOptions
+						bind:date_option
+						bind:year
+						bind:since
+						bind:until
+					/>
+
+					<Button
+						type="submit"
+						size="lg"
+						class="h-11 w-full"
+						disabled={github_query?.loading}
+					>
+						{github_query?.loading ? 'Analyzing…' : 'Analyze commits'}
+					</Button>
+				</form>
+			</Card.Content>
+		</Card.Root>
+	</div>
+
+	<svelte:boundary>
+		<div class="min-w-0">
+			{#if github_query}
+				{#if github_query.error}
+					<Alert.Root variant="destructive">
+						<AlertCircle class_names="h-5 w-5" />
+						<Alert.Title>Couldn’t build the report</Alert.Title>
+						<Alert.Description
+							>{github_query.error.message}</Alert.Description
+						>
+					</Alert.Root>
+				{:else if github_query.loading}
+					<LoadingSkeleton />
+				{:else if github_query.current}
+					<div class="grid gap-6">
+						<div
+							class="chart-panel reveal-up grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+						>
+							<div class="min-w-0">
+								<Badge variant="outline" class="mb-3">
+									{new Date(
+										github_query.current.since,
+									).toLocaleDateString()} — {new Date(
+										github_query.current.until,
+									).toLocaleDateString()}
+								</Badge>
+								<h2
+									class="title-font truncate text-3xl font-semibold tracking-tight sm:text-4xl"
+								>
+									{github_query.current.username}'s contribution map
+								</h2>
+							</div>
+							<p
+								class="max-w-[42ch] text-sm text-pretty text-muted-foreground lg:text-right"
+							>
+								GitHub Search returns the first 1,000 matching commits
+								for this range.
+							</p>
+						</div>
+
+						{#if github_query.current.reached_limit}
+							<Alert.Root>
+								<AlertTriangle class_names="h-5 w-5" />
+								<Alert.Title>GitHub search limit reached</Alert.Title>
+								<Alert.Description
+									>{github_query.current.note}</Alert.Description
+								>
+							</Alert.Root>
+						{/if}
+
+						<StatsOverview stats={github_query.current} />
+
+						<div
+							class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.82fr)]"
+						>
+							<RepositoryContributionChart
+								stats={github_query.current}
+							/>
+							<CommitDistributionChart stats={github_query.current} />
+						</div>
+
+						<HourDistributionChart stats={github_query.current} />
+					</div>
+				{/if}
+			{:else}
+				<Card.Root class="chart-panel min-h-[420px] border-dashed">
+					<Card.Content
+						class="flex h-full min-h-[420px] flex-col items-center justify-center p-10 text-center"
+					>
+						<div
+							class="mb-6 rounded-3xl bg-primary/10 p-5 text-primary"
+						>
+							<Rocket class_names="h-12 w-12" />
+						</div>
+						<h2
+							class="title-font max-w-lg text-3xl font-semibold tracking-tight text-balance"
+						>
+							Start with a username.
+						</h2>
+						<p
+							class="mt-3 max-w-md text-pretty text-muted-foreground"
+						>
+							Choose a GitHub handle and date range to reveal
+							repository focus, commit mix, and UTC working rhythm.
+						</p>
+					</Card.Content>
+				</Card.Root>
+			{/if}
 		</div>
-	{/snippet}
-</svelte:boundary>
+
+		{#snippet pending()}
+			<LoadingSkeleton />
+		{/snippet}
+	</svelte:boundary>
+</section>

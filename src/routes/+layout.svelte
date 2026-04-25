@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ThemeToggle } from '$lib/components';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Separator } from '$lib/components/ui/separator';
 	import '../app.css';
 
 	let { children } = $props();
@@ -8,36 +11,55 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>GitHub Stats Lab</title>
+	<meta
+		name="description"
+		content="Map GitHub commit activity by repository, date range, and UTC working rhythm."
+	/>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-base-200">
-	<main class="flex flex-grow items-center justify-center p-4">
+<div class="isolate min-h-dvh">
+	<header
+		class="sticky top-0 z-20 border-b bg-background/75 backdrop-blur-xl"
+	>
 		<div
-			class="relative container mx-auto max-w-6xl rounded-box bg-base-100 p-8 shadow-xl"
+			class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
 		>
-			<!-- Theme Toggle -->
-			<div class="absolute top-4 right-4">
+			<a
+				href={resolve('/')}
+				class="flex items-center gap-3 font-semibold tracking-tight"
+			>
+				<span
+					class="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm"
+				>
+					⌁
+				</span>
+				<span>GitHub Stats Lab</span>
+			</a>
+			<div class="flex items-center gap-2">
+				<Badge variant="outline" class="hidden sm:inline-flex"
+					>Live GitHub data</Badge
+				>
 				<ThemeToggle />
 			</div>
-
-			<h1 class="mb-8 text-center text-3xl font-bold">
-				GitHub Contribution Tracker
-			</h1>
-			{@render children?.()}
 		</div>
+	</header>
+
+	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 xl:py-10">
+		{@render children?.()}
 	</main>
 
-	<footer
-		class="footer-center footer bg-base-300 p-4 text-base-content"
-	>
-		<div>
-			<p>
-				Copyright &copy; 2020 - {new Date().getFullYear()} - Made with
-				🤖 and ❤️ by
-				<a class="link link-primary" href="https://scottspence.com">
-					Scott Spence
-				</a>
-			</p>
-		</div>
+	<footer class="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+		<Separator class="mb-6" />
+		<p class="text-sm text-muted-foreground">
+			Made by
+			<a
+				class="font-medium text-foreground underline-offset-4 hover:underline"
+				href="https://scottspence.com"
+			>
+				Scott Spence
+			</a>
+			· Commit data from the GitHub API.
+		</p>
 	</footer>
 </div>

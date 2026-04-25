@@ -5,23 +5,18 @@
 		label,
 		group = $bindable(''),
 		checked = false,
-		class: class_name = 'radio radio-sm',
 	} = $props();
-
-	let bind_group = $state(group);
-
-	$effect(() => {
-		group = bind_group;
-	});
 </script>
 
-<label class="flex cursor-pointer items-center justify-between">
-	<span class="fieldset-label">{label}</span>
+<label
+	class="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm transition-colors hover:bg-muted/70"
+>
+	<span>{label}</span>
 	<input
 		type="radio"
 		{name}
 		{value}
-		class={class_name}
+		class="size-4 border-input text-primary focus:ring-ring"
 		bind:group
 		{checked}
 	/>

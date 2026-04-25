@@ -1,49 +1,53 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { Button } from '$lib/components/ui/button';
 	import { Moon, Sun } from '$lib/icons';
 	import { onMount } from 'svelte';
 
-	let current_theme = $state('light');
+	let current_theme: 'light' | 'dark' = $state('light');
+
+	const apply_theme = (theme: 'light' | 'dark') => {
+		current_theme = theme;
+		if (!browser) return;
+
+		document.documentElement.classList.toggle(
+			'dark',
+			theme === 'dark',
+		);
+		document.documentElement.setAttribute('data-theme', theme);
+		localStorage.setItem('theme', theme);
+	};
 
 	const toggle_theme = () => {
-		const new_theme = current_theme === 'light' ? 'dark' : 'light';
-		current_theme = new_theme;
-
-		if (browser) {
-			document.documentElement.setAttribute('data-theme', new_theme);
-			localStorage.setItem('theme', new_theme);
-		}
+		apply_theme(current_theme === 'light' ? 'dark' : 'light');
 	};
 
 	onMount(() => {
-		if (browser) {
-			const stored_theme = localStorage.getItem('theme');
-			const preferred_theme =
-				stored_theme ||
-				(window.matchMedia('(prefers-color-scheme: dark)').matches
-					? 'dark'
-					: 'light');
+		const stored_theme = localStorage.getItem('theme') as
+			| 'light'
+			| 'dark'
+			| null;
+		const preferred_theme = window.matchMedia(
+			'(prefers-color-scheme: dark)',
+		).matches
+			? 'dark'
+			: 'light';
 
-			current_theme = preferred_theme;
-			document.documentElement.setAttribute(
-				'data-theme',
-				preferred_theme,
-			);
-		}
+		apply_theme(stored_theme ?? preferred_theme);
 	});
 </script>
 
-<button
-	class="btn btn-circle btn-ghost"
+<Button
+	variant="outline"
+	size="icon"
 	onclick={toggle_theme}
 	title="Toggle theme"
 	aria-label="Toggle between light and dark theme"
+	class="rounded-full bg-card/80 backdrop-blur"
 >
 	{#if current_theme === 'light'}
-		<!-- Moon icon for dark mode -->
-		<Moon class_names="h-5 w-5" />
+		<Moon class_names="h-4 w-4" />
 	{:else}
-		<!-- Sun icon for light mode -->
-		<Sun class_names="h-5 w-5" />
+		<Sun class_names="h-4 w-4" />
 	{/if}
-</button>
+</Button>

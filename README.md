@@ -1,6 +1,7 @@
 # GitHub Stats Lab
 
-A SvelteKit dashboard for exploring public GitHub commit activity by user and date range.
+A SvelteKit dashboard for exploring public GitHub commit activity by
+user and date range.
 
 ## Stack
 

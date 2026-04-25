@@ -49,9 +49,9 @@
 <Card.Root class="chart-panel reveal-up">
 	<Card.Header class="flex-row items-start justify-between gap-4">
 		<div>
-			<Card.Title>Workload share</Card.Title>
+			<Card.Title>Repository share</Card.Title>
 			<Card.Description>
-				How the work split across repositories.
+				Share of commits by public repository.
 			</Card.Description>
 		</div>
 		<Button

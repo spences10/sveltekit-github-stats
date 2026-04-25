@@ -14,7 +14,7 @@
 	<title>GitHub Stats Lab</title>
 	<meta
 		name="description"
-		content="Map GitHub commit activity by repository, date range, and UTC working rhythm."
+		content="Explore public GitHub commit activity by repository, date range, and UTC hour."
 	/>
 </svelte:head>
 

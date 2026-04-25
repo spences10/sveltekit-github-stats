@@ -58,9 +58,9 @@
 <Card.Root class="chart-panel reveal-up">
 	<Card.Header class="flex-row items-start justify-between gap-4">
 		<div>
-			<Card.Title>Repository focus</Card.Title>
+			<Card.Title>Repository activity</Card.Title>
 			<Card.Description>
-				Where the selected commits landed.
+				Commit counts by public repository.
 			</Card.Description>
 		</div>
 		<div class="flex items-center gap-2">

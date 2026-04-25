@@ -58,9 +58,9 @@
 <Card.Root class="chart-panel reveal-up">
 	<Card.Header class="flex-row items-start justify-between gap-4">
 		<div>
-			<Card.Title>Work rhythm (UTC)</Card.Title>
+			<Card.Title>Commit timing (UTC)</Card.Title>
 			<Card.Description>
-				Commit timing grouped by author timestamp hour.
+				Commits grouped by author timestamp hour.
 			</Card.Description>
 		</div>
 		{#if peak}

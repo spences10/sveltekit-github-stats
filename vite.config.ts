@@ -1,9 +1,29 @@
-import { sveltekit } from '@sveltejs/kit/vite';
+// @ts-nocheck -- Vite+ lint/fmt keys are not part of Vitest's config types yet.
 import tailwindcss from '@tailwindcss/vite';
+import { sveltekit } from '@sveltejs/kit/vite';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+	fmt: {
+		useTabs: true,
+		singleQuote: true,
+		printWidth: 70,
+		trailingComma: 'all',
+	},
+	lint: {
+		ignorePatterns: [
+			'**/node_modules/**',
+			'**/.svelte-kit/**',
+			'**/build/**',
+			'**/dist/**',
+			'**/test-results/**',
+		],
+		options: {
+			typeAware: true,
+			typeCheck: true,
+		},
+	},
 	plugins: [tailwindcss(), sveltekit()],
 	test: {
 		expect: { requireAssertions: true },

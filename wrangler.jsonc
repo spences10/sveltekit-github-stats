@@ -3,6 +3,12 @@
 	"name": "sveltekit-github-stats",
 	"compatibility_date": "2026-04-18",
 	"main": ".svelte-kit/cloudflare/_worker.js",
+	"routes": [
+		{
+			"pattern": "sveltekit-github-stats.ss10.dev",
+			"custom_domain": true,
+		},
+	],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare",

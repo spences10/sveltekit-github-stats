@@ -5,19 +5,17 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"clean:worker-types": "node -e \"const fs = require('node:fs'); for (const p of ['.svelte-kit/cloudflare', '.svelte-kit/cloudflare-tmp']) fs.rmSync(p, { recursive: true, force: true })\"",
-		"build": "pnpm run clean:worker-types && wrangler types --check && vite build",
-		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
+		"build": "vite build",
+		"preview": "vite preview",
 		"deploy": "pnpm run build && wrangler deploy",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "pnpm run clean:worker-types && wrangler types --check && vp check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && prettier --check \"**/*.svelte\"",
+		"check": "vp check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && prettier --check \"**/*.svelte\"",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "vp fmt && prettier --write \"**/*.svelte\"",
 		"lint": "vp check && prettier --check \"**/*.svelte\"",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "playwright test",
-		"gen": "pnpm run clean:worker-types && wrangler types"
+		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.12.1",

@@ -211,98 +211,90 @@
 		</Card.Root>
 	</div>
 
-	<svelte:boundary>
-		<div class="min-w-0">
-			{#if github_query}
-				{#if github_query.error}
-					<Alert.Root variant="destructive">
-						<AlertCircle class_names="h-5 w-5" />
-						<Alert.Title>Couldn’t fetch commits</Alert.Title>
-						<Alert.Description
-							>{github_query.error.message}</Alert.Description
-						>
-					</Alert.Root>
-				{:else if github_query.loading}
-					<LoadingSkeleton />
-				{:else if github_query.current}
-					<div class="grid gap-6">
-						<div
-							class="chart-panel reveal-up grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
-						>
-							<div class="min-w-0">
-								<Badge variant="outline" class="mb-3">
-									{new Date(
-										github_query.current.since,
-									).toLocaleDateString()} — {new Date(
-										github_query.current.until,
-									).toLocaleDateString()}
-								</Badge>
-								<h2
-									class="title-font truncate text-3xl font-semibold tracking-tight sm:text-4xl"
-								>
-									{github_query.current.username}'s public commits
-								</h2>
-							</div>
-							<p
-								class="max-w-[42ch] text-sm text-pretty text-muted-foreground lg:text-right"
-							>
-								GitHub Search returns the first 1,000 matching commits
-								for this range.
-							</p>
-						</div>
-
-						{#if github_query.current.reached_limit}
-							<Alert.Root>
-								<AlertTriangle class_names="h-5 w-5" />
-								<Alert.Title>GitHub search limit reached</Alert.Title>
-								<Alert.Description
-									>{github_query.current.note}</Alert.Description
-								>
-							</Alert.Root>
-						{/if}
-
-						<StatsOverview stats={github_query.current} />
-
-						<div
-							class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.82fr)]"
-						>
-							<RepositoryContributionChart
-								stats={github_query.current}
-							/>
-							<CommitDistributionChart stats={github_query.current} />
-						</div>
-
-						<HourDistributionChart stats={github_query.current} />
-					</div>
-				{/if}
-			{:else}
-				<Card.Root class="chart-panel min-h-[420px] border-dashed">
-					<Card.Content
-						class="flex h-full min-h-[420px] flex-col items-center justify-center p-10 text-center"
+	<div class="min-w-0">
+		{#if github_query}
+			{#if github_query.error}
+				<Alert.Root variant="destructive">
+					<AlertCircle class_names="h-5 w-5" />
+					<Alert.Title>Couldn’t fetch commits</Alert.Title>
+					<Alert.Description
+						>{github_query.error.message}</Alert.Description
 					>
-						<div
-							class="mb-6 rounded-3xl bg-primary/10 p-5 text-primary"
-						>
-							<Rocket class_names="h-12 w-12" />
+				</Alert.Root>
+			{:else if github_query.loading}
+				<LoadingSkeleton />
+			{:else if github_query.current}
+				<div class="grid gap-6">
+					<div
+						class="chart-panel reveal-up grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+					>
+						<div class="min-w-0">
+							<Badge variant="outline" class="mb-3">
+								{new Date(
+									github_query.current.since,
+								).toLocaleDateString()} — {new Date(
+									github_query.current.until,
+								).toLocaleDateString()}
+							</Badge>
+							<h2
+								class="title-font truncate text-3xl font-semibold tracking-tight sm:text-4xl"
+							>
+								{github_query.current.username}'s public commits
+							</h2>
 						</div>
-						<h2
-							class="title-font max-w-lg text-3xl font-semibold tracking-tight text-balance"
-						>
-							Start with a GitHub username.
-						</h2>
 						<p
-							class="mt-3 max-w-md text-pretty text-muted-foreground"
+							class="max-w-[42ch] text-sm text-pretty text-muted-foreground lg:text-right"
 						>
-							Choose a GitHub handle and date range to see public
-							commit totals, repository activity, and UTC timing.
+							GitHub Search returns the first 1,000 matching commits
+							for this range.
 						</p>
-					</Card.Content>
-				</Card.Root>
-			{/if}
-		</div>
+					</div>
 
-		{#snippet pending()}
-			<LoadingSkeleton />
-		{/snippet}
-	</svelte:boundary>
+					{#if github_query.current.reached_limit}
+						<Alert.Root>
+							<AlertTriangle class_names="h-5 w-5" />
+							<Alert.Title>GitHub search limit reached</Alert.Title>
+							<Alert.Description
+								>{github_query.current.note}</Alert.Description
+							>
+						</Alert.Root>
+					{/if}
+
+					<StatsOverview stats={github_query.current} />
+
+					<div
+						class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.82fr)]"
+					>
+						<RepositoryContributionChart
+							stats={github_query.current}
+						/>
+						<CommitDistributionChart stats={github_query.current} />
+					</div>
+
+					<HourDistributionChart stats={github_query.current} />
+				</div>
+			{/if}
+		{:else}
+			<Card.Root class="chart-panel min-h-105 border-dashed">
+				<Card.Content
+					class="flex h-full min-h-105 flex-col items-center justify-center p-10 text-center"
+				>
+					<div
+						class="mb-6 rounded-3xl bg-primary/10 p-5 text-primary"
+					>
+						<Rocket class_names="h-12 w-12" />
+					</div>
+					<h2
+						class="title-font max-w-lg text-3xl font-semibold tracking-tight text-balance"
+					>
+						Start with a GitHub username.
+					</h2>
+					<p class="mt-3 max-w-md text-pretty text-muted-foreground">
+						Choose a GitHub handle and date range to see public commit
+						totals, repository activity, and UTC timing.
+					</p>
+				</Card.Content>
+			</Card.Root>
+		{/if}
+	</div>
 </section>

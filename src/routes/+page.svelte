@@ -14,8 +14,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { get_github_stats } from '$lib/github.remote';
 	import { AlertCircle, AlertTriangle, Rocket } from '$lib/icons';
+	import type { github_stats_result } from '$lib/server/github-stats';
 	import { onMount, untrack } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';
@@ -32,16 +32,11 @@
 	let year = $state(new SvelteDate().getFullYear().toString());
 	let since = $state(initial_date);
 	let until = $state(initial_date);
-	let query_params = $state<{
-		username: string;
-		since: string;
-		until: string;
-		timestamp: number;
+	let github_query = $state<{
+		loading: boolean;
+		error: Error | null;
+		current: github_stats_result | null;
 	} | null>(null);
-
-	const github_query = $derived(
-		query_params ? get_github_stats(query_params) : null,
-	);
 
 	const calculate_dates = () => {
 		let calculated_since: string;
@@ -103,7 +98,7 @@
 		return { calculated_since, calculated_until };
 	};
 
-	const fetch_contributions = () => {
+	const fetch_contributions = async () => {
 		const trimmed_username = username.trim();
 		if (!trimmed_username) return;
 
@@ -112,12 +107,33 @@
 		}
 
 		const { calculated_since, calculated_until } = calculate_dates();
-		query_params = {
-			username: trimmed_username,
-			since: calculated_since,
-			until: calculated_until,
-			timestamp: Date.now(),
-		};
+		github_query = { loading: true, error: null, current: null };
+
+		try {
+			const params = new URLSearchParams({
+				username: trimmed_username,
+				since: calculated_since,
+				until: calculated_until,
+			});
+			const response = await fetch(`/api/github-stats?${params}`);
+			if (!response.ok) {
+				throw new Error(await response.text());
+			}
+			github_query = {
+				loading: false,
+				error: null,
+				current: (await response.json()) as github_stats_result,
+			};
+		} catch (error) {
+			github_query = {
+				loading: false,
+				error:
+					error instanceof Error
+						? error
+						: new Error('Failed to fetch commits'),
+				current: null,
+			};
+		}
 	};
 
 	const handle_quick_date_select = (

@@ -230,7 +230,7 @@
 				id="username"
 				name="username"
 				label="GitHub handle"
-				placeholder="scottspence"
+				placeholder="spences10"
 				class="h-11 text-base"
 				bind:value={username}
 				required
@@ -318,10 +318,12 @@
 					stats={github_query.current.primary}
 					comparison_stats={github_query.current.comparison}
 				/>
-				<DailyActivityChart
-					stats={github_query.current.primary}
-					comparison_stats={github_query.current.comparison}
-				/>
+				{#if github_query.current.primary.since !== github_query.current.primary.until}
+					<DailyActivityChart
+						stats={github_query.current.primary}
+						comparison_stats={github_query.current.comparison}
+					/>
+				{/if}
 				<div class="grid gap-6 xl:grid-cols-2">
 					<RepositoryDistributionChart
 						stats={github_query.current.primary}

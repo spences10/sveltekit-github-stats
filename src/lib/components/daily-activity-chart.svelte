@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { github_stats_result } from '$lib/server/github-stats';
-	import { AreaChart, defaultChartPadding } from 'layerchart';
+	import { curveMonotoneX } from 'd3-shape';
+	import {
+		Area,
+		AreaChart,
+		defaultChartPadding,
+		LinearGradient,
+	} from 'layerchart';
 	import { SvelteDate } from 'svelte/reactivity';
 
 	let { stats, comparison_stats = null } = $props<{
@@ -92,8 +98,47 @@
 			x="date"
 			{series}
 			points
+			props={{
+				xAxis: {
+					ticks: Math.min(daily_data.length, 7),
+					format: (value: Date) =>
+						value.toLocaleDateString('en', {
+							month: 'short',
+							day: 'numeric',
+						}),
+				},
+			}}
 			padding={defaultChartPadding({ left: 8, right: 12 })}
 			height={320}
-		/>
+		>
+			{#snippet marks()}
+				<LinearGradient class="from-chart-1/40 to-chart-1/0" vertical>
+					{#snippet children({ gradient })}
+						<Area
+							seriesKey="primary"
+							curve={curveMonotoneX}
+							fill={gradient}
+							line={{ class: 'stroke-chart-1 stroke-2' }}
+						/>
+					{/snippet}
+				</LinearGradient>
+
+				{#if comparison_stats}
+					<LinearGradient
+						class="from-chart-2/35 to-chart-2/0"
+						vertical
+					>
+						{#snippet children({ gradient })}
+							<Area
+								seriesKey="comparison"
+								curve={curveMonotoneX}
+								fill={gradient}
+								line={{ class: 'stroke-chart-2 stroke-2' }}
+							/>
+						{/snippet}
+					</LinearGradient>
+				{/if}
+			{/snippet}
+		</AreaChart>
 	</div>
 </section>

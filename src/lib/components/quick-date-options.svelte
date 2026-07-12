@@ -19,29 +19,34 @@
 	const date_options = [
 		{ key: 'today', label: 'Today' },
 		{ key: 'yesterday', label: 'Yesterday' },
-		{ key: 'this_week', label: 'This week' },
-		{ key: 'this_month', label: 'This month' },
-		{ key: 'this_year', label: 'This year' },
+		{ key: 'this_week', label: 'Week' },
+		{ key: 'this_month', label: 'Month' },
+		{ key: 'this_year', label: 'Year' },
 	] as const;
 </script>
 
-<fieldset class="grid gap-2">
-	<legend class="text-sm font-medium text-muted-foreground"
-		>Quick range</legend
+<div class="grid gap-3 sm:grid-cols-[5rem_1fr] sm:items-center">
+	<span class="section-kicker" id="range-label">Range</span>
+	<div
+		class="flex flex-wrap gap-x-1 gap-y-2"
+		role="group"
+		aria-labelledby="range-label"
 	>
-	<div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
 		{#each date_options as option (option.key)}
 			<Button
 				type="button"
-				variant={current_date_option === option.key
-					? 'default'
-					: 'outline'}
-				size="lg"
-				class="h-10"
+				variant="ghost"
+				size="sm"
+				class={[
+					'h-8 rounded-md px-3 font-normal',
+					current_date_option === option.key
+						? 'bg-accent text-accent-foreground hover:bg-accent/80'
+						: 'text-muted-foreground',
+				]}
 				onclick={() => on_quick_date_select(option.key)}
 			>
 				{option.label}
 			</Button>
 		{/each}
 	</div>
-</fieldset>
+</div>

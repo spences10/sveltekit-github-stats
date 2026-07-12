@@ -24,9 +24,7 @@
 
 	onMount(() => {
 		const stored_theme = localStorage.getItem('theme') as
-			| 'light'
-			| 'dark'
-			| null;
+			'light' | 'dark' | null;
 		const preferred_theme = window.matchMedia(
 			'(prefers-color-scheme: dark)',
 		).matches
@@ -38,12 +36,14 @@
 </script>
 
 <Button
-	variant="outline"
+	variant="ghost"
 	size="icon"
 	onclick={toggle_theme}
 	title="Toggle theme"
-	aria-label="Toggle between light and dark theme"
-	class="rounded-full bg-card/80 backdrop-blur"
+	aria-label={current_theme === 'light'
+		? 'Use dark theme'
+		: 'Use light theme'}
+	class="rounded-md border bg-background hover:bg-muted"
 >
 	{#if current_theme === 'light'}
 		<Moon class_names="h-4 w-4" />

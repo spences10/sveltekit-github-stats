@@ -5,7 +5,7 @@ import Page from './+page.svelte';
 
 describe('/+page.svelte', () => {
 	it('should render h2', async () => {
-		render(Page, {
+		await render(Page, {
 			data: {
 				initial_date_option: 'this_year',
 				initial_date: '',

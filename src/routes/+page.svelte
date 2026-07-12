@@ -2,23 +2,26 @@
 	import { browser } from '$app/environment';
 	import {
 		AdvancedOptions,
-		CommitDistributionChart,
+		DailyActivityChart,
 		FormInput,
 		HourDistributionChart,
 		LoadingSkeleton,
 		QuickDateOptions,
-		RepositoryContributionChart,
+		RepositoryDistributionChart,
 		StatsOverview,
 	} from '$lib/components';
 	import * as Alert from '$lib/components/ui/alert';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { AlertCircle, AlertTriangle, Rocket } from '$lib/icons';
+	import { AlertCircle, AlertTriangle } from '$lib/icons';
 	import type { github_stats_result } from '$lib/server/github-stats';
 	import { onMount, untrack } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';
+
+	type StatsPair = {
+		primary: github_stats_result;
+		comparison: github_stats_result | null;
+	};
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -28,14 +31,16 @@
 	}));
 
 	let username = $state('');
+	let comparison_username = $state('');
 	let date_option = $state(initial_date_option);
 	let year = $state(new SvelteDate().getFullYear().toString());
 	let since = $state(initial_date);
 	let until = $state(initial_date);
+	let comparison_error = $state<Error | null>(null);
 	let github_query = $state<{
 		loading: boolean;
 		error: Error | null;
-		current: github_stats_result | null;
+		current: StatsPair | null;
 	} | null>(null);
 
 	const calculate_dates = () => {
@@ -98,42 +103,88 @@
 		return { calculated_since, calculated_until };
 	};
 
+	const request_stats = async (
+		handle: string,
+		calculated_since: string,
+		calculated_until: string,
+	) => {
+		const params = new URLSearchParams({
+			username: handle,
+			since: calculated_since,
+			until: calculated_until,
+		});
+		const response = await fetch(`/api/github-stats?${params}`);
+		if (!response.ok) throw new Error(await response.text());
+		return (await response.json()) as github_stats_result;
+	};
+
 	const fetch_contributions = async () => {
 		const trimmed_username = username.trim();
+		const trimmed_comparison = comparison_username.trim();
 		if (!trimmed_username) return;
 
 		if (browser) {
 			localStorage.setItem('github_username', trimmed_username);
+			if (trimmed_comparison) {
+				localStorage.setItem(
+					'github_comparison_username',
+					trimmed_comparison,
+				);
+			} else {
+				localStorage.removeItem('github_comparison_username');
+			}
 		}
 
 		const { calculated_since, calculated_until } = calculate_dates();
+		comparison_error = null;
 		github_query = { loading: true, error: null, current: null };
 
-		try {
-			const params = new URLSearchParams({
-				username: trimmed_username,
-				since: calculated_since,
-				until: calculated_until,
-			});
-			const response = await fetch(`/api/github-stats?${params}`);
-			if (!response.ok) {
-				throw new Error(await response.text());
-			}
-			github_query = {
-				loading: false,
-				error: null,
-				current: (await response.json()) as github_stats_result,
-			};
-		} catch (error) {
+		const primary_request = request_stats(
+			trimmed_username,
+			calculated_since,
+			calculated_until,
+		);
+		const comparison_request = trimmed_comparison
+			? request_stats(
+					trimmed_comparison,
+					calculated_since,
+					calculated_until,
+				)
+			: Promise.resolve(null);
+
+		const [primary_result, comparison_result] =
+			await Promise.allSettled([primary_request, comparison_request]);
+
+		if (primary_result.status === 'rejected') {
 			github_query = {
 				loading: false,
 				error:
-					error instanceof Error
-						? error
+					primary_result.reason instanceof Error
+						? primary_result.reason
 						: new Error('Failed to fetch commits'),
 				current: null,
 			};
+			return;
 		}
+
+		if (comparison_result.status === 'rejected') {
+			comparison_error =
+				comparison_result.reason instanceof Error
+					? comparison_result.reason
+					: new Error('Failed to fetch comparison');
+		}
+
+		github_query = {
+			loading: false,
+			error: null,
+			current: {
+				primary: primary_result.value,
+				comparison:
+					comparison_result.status === 'fulfilled'
+						? comparison_result.value
+						: null,
+			},
+		};
 	};
 
 	const handle_quick_date_select = (
@@ -154,163 +205,142 @@
 	};
 
 	onMount(() => {
-		const saved_username = localStorage.getItem('github_username');
-		if (saved_username) {
-			username = saved_username;
-		}
+		username = localStorage.getItem('github_username') ?? '';
+		comparison_username =
+			localStorage.getItem('github_comparison_username') ?? '';
 	});
 </script>
 
-<section class="space-y-8">
-	<div
-		class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(380px,500px)] lg:items-start"
-	>
-		<div class="max-w-3xl">
-			<Badge variant="secondary" class="mb-4"
-				>Public commit analytics</Badge
+<section>
+	<header class="max-w-2xl">
+		<h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
+			SvelteKit GitHub Stats
+		</h1>
+		<p class="mt-4 text-lg leading-8 text-muted-foreground">
+			See public commit activity for one GitHub user, or put two
+			handles side by side.
+		</p>
+	</header>
+
+	<form class="panel mt-8 overflow-hidden" onsubmit={handle_submit}>
+		<div
+			class="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto_1fr] lg:items-end"
+		>
+			<FormInput
+				id="username"
+				name="username"
+				label="GitHub handle"
+				placeholder="scottspence"
+				class="h-11 text-base"
+				bind:value={username}
+				required
+			/>
+			<span
+				class="hidden pb-3 text-xs font-semibold text-muted-foreground uppercase lg:block"
 			>
-			<h1
-				class="title-font text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-			>
-				Explore public GitHub commit activity.
-			</h1>
-			<p
-				class="mt-5 max-w-[62ch] text-lg text-pretty text-muted-foreground"
-			>
-				Search a username, choose a date range, and summarize public
-				commits by repository, volume, and UTC hour.
-			</p>
+				vs
+			</span>
+			<FormInput
+				id="comparison_username"
+				name="comparison_username"
+				label="Compare with"
+				placeholder="Optional second handle"
+				class="h-11 text-base"
+				bind:value={comparison_username}
+			/>
 		</div>
 
-		<Card.Root class="chart-panel">
-			<Card.Header>
-				<Card.Title>Search commits</Card.Title>
-				<Card.Description>
-					Use a GitHub username to look up public commits for the
-					selected range.
-				</Card.Description>
-			</Card.Header>
-			<Card.Content class="pt-0">
-				<form class="grid gap-5" onsubmit={handle_submit}>
-					<FormInput
-						id="username"
-						name="username"
-						label="GitHub username"
-						placeholder="sveltejs"
-						class="h-11 text-base"
-						bind:value={username}
-						required
-					/>
+		<div class="grid gap-5 border-t bg-muted/25 p-5 sm:p-6">
+			<QuickDateOptions
+				on_quick_date_select={handle_quick_date_select}
+				bind:current_date_option={date_option}
+			/>
 
-					<QuickDateOptions
-						on_quick_date_select={handle_quick_date_select}
-						bind:current_date_option={date_option}
-					/>
+			<AdvancedOptions
+				bind:date_option
+				bind:year
+				bind:since
+				bind:until
+			/>
 
-					<AdvancedOptions
-						bind:date_option
-						bind:year
-						bind:since
-						bind:until
-					/>
-
-					<Button
-						type="submit"
-						size="lg"
-						class="h-11 w-full"
-						disabled={github_query?.loading}
-					>
-						{github_query?.loading ? 'Searching…' : 'Search commits'}
-					</Button>
-				</form>
-			</Card.Content>
-		</Card.Root>
-	</div>
-
-	<div class="min-w-0">
-		{#if github_query}
-			{#if github_query.error}
-				<Alert.Root variant="destructive">
-					<AlertCircle class_names="h-5 w-5" />
-					<Alert.Title>Couldn’t fetch commits</Alert.Title>
-					<Alert.Description
-						>{github_query.error.message}</Alert.Description
-					>
-				</Alert.Root>
-			{:else if github_query.loading}
-				<LoadingSkeleton />
-			{:else if github_query.current}
-				<div class="grid gap-6">
-					<div
-						class="chart-panel reveal-up grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
-					>
-						<div class="min-w-0">
-							<Badge variant="outline" class="mb-3">
-								{new Date(
-									github_query.current.since,
-								).toLocaleDateString()} — {new Date(
-									github_query.current.until,
-								).toLocaleDateString()}
-							</Badge>
-							<h2
-								class="title-font truncate text-3xl font-semibold tracking-tight sm:text-4xl"
-							>
-								{github_query.current.username}'s public commits
-							</h2>
-						</div>
-						<p
-							class="max-w-[42ch] text-sm text-pretty text-muted-foreground lg:text-right"
-						>
-							GitHub Search returns the first 1,000 matching commits
-							for this range.
-						</p>
-					</div>
-
-					{#if github_query.current.reached_limit}
-						<Alert.Root>
-							<AlertTriangle class_names="h-5 w-5" />
-							<Alert.Title>GitHub search limit reached</Alert.Title>
-							<Alert.Description
-								>{github_query.current.note}</Alert.Description
-							>
-						</Alert.Root>
-					{/if}
-
-					<StatsOverview stats={github_query.current} />
-
-					<div
-						class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.82fr)]"
-					>
-						<RepositoryContributionChart
-							stats={github_query.current}
-						/>
-						<CommitDistributionChart stats={github_query.current} />
-					</div>
-
-					<HourDistributionChart stats={github_query.current} />
-				</div>
-			{/if}
-		{:else}
-			<Card.Root class="chart-panel min-h-105 border-dashed">
-				<Card.Content
-					class="flex h-full min-h-105 flex-col items-center justify-center p-10 text-center"
+			<div class="flex justify-end">
+				<Button
+					type="submit"
+					size="lg"
+					class="h-11 min-w-36 px-5"
+					disabled={github_query?.loading}
 				>
-					<div
-						class="mb-6 rounded-3xl bg-primary/10 p-5 text-primary"
-					>
-						<Rocket class_names="h-12 w-12" />
-					</div>
-					<h2
-						class="title-font max-w-lg text-3xl font-semibold tracking-tight text-balance"
-					>
-						Start with a GitHub username.
-					</h2>
-					<p class="mt-3 max-w-md text-pretty text-muted-foreground">
-						Choose a GitHub handle and date range to see public commit
-						totals, repository activity, and UTC timing.
-					</p>
-				</Card.Content>
-			</Card.Root>
-		{/if}
-	</div>
+					{github_query?.loading ? 'Loading…' : 'Show stats'}
+				</Button>
+			</div>
+		</div>
+	</form>
 </section>
+
+<div class="mt-10 min-w-0">
+	{#if github_query}
+		{#if github_query.error}
+			<Alert.Root variant="destructive">
+				<AlertCircle class_names="h-5 w-5" />
+				<Alert.Title>Couldn’t fetch commits</Alert.Title>
+				<Alert.Description
+					>{github_query.error.message}</Alert.Description
+				>
+			</Alert.Root>
+		{:else if github_query.loading}
+			<LoadingSkeleton />
+		{:else if github_query.current}
+			<div class="grid gap-6 reveal-up">
+				{#if comparison_error}
+					<Alert.Root variant="destructive">
+						<AlertCircle class_names="h-5 w-5" />
+						<Alert.Title>Couldn’t load the comparison</Alert.Title>
+						<Alert.Description
+							>{comparison_error.message}</Alert.Description
+						>
+					</Alert.Root>
+				{/if}
+
+				{#if github_query.current.primary.reached_limit || github_query.current.comparison?.reached_limit}
+					<Alert.Root>
+						<AlertTriangle class_names="h-5 w-5" />
+						<Alert.Title
+							>GitHub’s 1,000-result limit applies</Alert.Title
+						>
+						<Alert.Description>
+							Large ranges may show partial totals and repository
+							data.
+						</Alert.Description>
+					</Alert.Root>
+				{/if}
+
+				<StatsOverview
+					stats={github_query.current.primary}
+					comparison_stats={github_query.current.comparison}
+				/>
+				<DailyActivityChart
+					stats={github_query.current.primary}
+					comparison_stats={github_query.current.comparison}
+				/>
+				<div class="grid gap-6 xl:grid-cols-2">
+					<RepositoryDistributionChart
+						stats={github_query.current.primary}
+						comparison_stats={github_query.current.comparison}
+					/>
+					<HourDistributionChart
+						stats={github_query.current.primary}
+						comparison_stats={github_query.current.comparison}
+					/>
+				</div>
+			</div>
+		{/if}
+	{:else}
+		<section class="mt-10 border-t py-8">
+			<h2 class="text-sm font-medium">Start with a GitHub handle.</h2>
+			<p class="mt-1 text-sm text-muted-foreground">
+				The comparison handle is optional, and both are saved on this
+				device.
+			</p>
+		</section>
+	{/if}
+</div>

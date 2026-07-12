@@ -11,33 +11,31 @@
 	} = $props();
 </script>
 
-<details
-	class="group rounded-xl border border-border/70 bg-card/70 p-4"
->
+<details class="group border-t pt-4">
 	<summary
-		class="flex cursor-pointer list-none items-center justify-between text-sm font-medium marker:hidden"
+		class="flex cursor-pointer list-none items-center justify-between text-sm text-muted-foreground marker:hidden hover:text-foreground"
 	>
-		<span>Advanced range</span>
-		<span
-			class="text-muted-foreground transition group-open:rotate-180"
-			>⌄</span
-		>
+		<span>Specific year or custom dates</span>
+		<span class="transition-transform group-open:rotate-45">+</span>
 	</summary>
 
-	<div class="mt-4 grid gap-3">
-		<RadioOption
-			name="date_option"
-			value="today"
-			label="Today"
-			bind:group={date_option}
-			checked={date_option === 'today'}
-		/>
-		<RadioOption
-			name="date_option"
-			value="year"
-			label="Specific year"
-			bind:group={date_option}
-		/>
+	<div
+		class="mt-5 grid gap-4 rounded-md border bg-background p-4 sm:ml-20"
+	>
+		<div class="grid gap-2 sm:grid-cols-2">
+			<RadioOption
+				name="date_option"
+				value="year"
+				label="Specific year"
+				bind:group={date_option}
+			/>
+			<RadioOption
+				name="date_option"
+				value="custom"
+				label="Custom dates"
+				bind:group={date_option}
+			/>
+		</div>
 
 		{#if date_option === 'year'}
 			<FormInput
@@ -50,20 +48,11 @@
 				min="2008"
 				max={new Date().getFullYear().toString()}
 			/>
-		{/if}
-
-		<RadioOption
-			name="date_option"
-			value="custom"
-			label="Custom date range"
-			bind:group={date_option}
-		/>
-
-		{#if date_option === 'custom'}
+		{:else if date_option === 'custom'}
 			<DateRange
 				bind:since_value={since}
 				bind:until_value={until}
-				required={date_option === 'custom'}
+				required
 			/>
 		{/if}
 	</div>

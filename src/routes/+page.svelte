@@ -290,7 +290,7 @@
 		{:else if github_query.loading}
 			<LoadingSkeleton />
 		{:else if github_query.current}
-			<div class="grid gap-6 reveal-up">
+			<div class="reveal-up grid gap-6">
 				{#if comparison_error}
 					<Alert.Root variant="destructive">
 						<AlertCircle class_names="h-5 w-5" />

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import {
 		AdvancedOptions,
 		DailyActivityChart,
@@ -9,11 +8,12 @@
 		QuickDateOptions,
 		RepositoryDistributionChart,
 		StatsOverview,
-	} from '$lib/components';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Button } from '$lib/components/ui/button';
-	import { AlertCircle, AlertTriangle } from '$lib/icons';
-	import type { github_stats_result } from '$lib/server/github-stats';
+	} from '#lib/components/index.js';
+	import * as Alert from '#lib/components/ui/alert/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { AlertCircle, AlertTriangle } from '#lib/icons/index.js';
+	import type { github_stats_result } from '#lib/server/github-stats.js';
+	import { browser } from '$app/env';
 	import { onMount, untrack } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';

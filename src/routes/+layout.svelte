@@ -1,7 +1,7 @@
 <script lang="ts">
+	import favicon from '#lib/assets/favicon.svg';
+	import { ThemeToggle } from '#lib/components/index.js';
 	import { resolve } from '$app/paths';
-	import favicon from '$lib/assets/favicon.svg';
-	import { ThemeToggle } from '$lib/components';
 	import '../app.css';
 
 	let { children } = $props();

@@ -4,8 +4,5 @@
 	"cSpell.words": ["sveltejs"],
 	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"editor.formatOnSave": true,
-	"oxc.fmt.configPath": "./vite.config.ts",
-	"[svelte]": {
-		"editor.defaultFormatter": "svelte.svelte-vscode"
-	}
+	"oxc.fmt.configPath": "./vite.config.ts"
 }

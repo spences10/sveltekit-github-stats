@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { Button } from '$lib/components/ui/button';
-	import { Moon, Sun } from '$lib/icons';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Moon, Sun } from '#lib/icons/index.js';
+	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
 
 	let current_theme: 'light' | 'dark' = $state('light');
@@ -24,7 +24,9 @@
 
 	onMount(() => {
 		const stored_theme = localStorage.getItem('theme') as
-			'light' | 'dark' | null;
+			| 'light'
+			| 'dark'
+			| null;
 		const preferred_theme = window.matchMedia(
 			'(prefers-color-scheme: dark)',
 		).matches

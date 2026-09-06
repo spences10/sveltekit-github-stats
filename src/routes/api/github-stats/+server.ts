@@ -1,9 +1,9 @@
-import { get_github_stats_data } from '$lib/server/github-stats';
-import { error, json, type RequestHandler } from '@sveltejs/kit';
+import { get_github_stats_data } from '#lib/server/github-stats.js';
+import { error, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
-		return json(
+		return Response.json(
 			await get_github_stats_data({
 				username: url.searchParams.get('username') ?? '',
 				since: url.searchParams.get('since') ?? '',

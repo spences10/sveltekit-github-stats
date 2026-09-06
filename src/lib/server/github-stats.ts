@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/private';
+import { GITHUB_TOKEN } from '$app/env/private';
 import * as v from 'valibot';
 
 const repo_contribution_schema = v.object({
@@ -52,7 +52,7 @@ export async function get_github_stats_data(
 		github_params_schema,
 		params,
 	);
-	const github_token = env.GITHUB_TOKEN;
+	const github_token = GITHUB_TOKEN;
 
 	if (!github_token)
 		throw new Error('GITHUB_TOKEN is not configured.');

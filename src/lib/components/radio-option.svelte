@@ -1,11 +1,5 @@
 <script lang="ts">
-	let {
-		name,
-		value,
-		label,
-		group = $bindable(''),
-		checked = false,
-	} = $props();
+	let { name, value, label, group = $bindable('') } = $props();
 </script>
 
 <label class="flex cursor-pointer items-center gap-3 py-2 text-sm">
@@ -15,7 +9,6 @@
 		{value}
 		class="size-3.5 border-input bg-transparent text-primary focus:ring-ring"
 		bind:group
-		{checked}
 	/>
 	<span>{label}</span>
 </label>

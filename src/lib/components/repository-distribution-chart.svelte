@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { github_stats_result } from '$lib/server/github-stats';
+	import type { github_stats_result } from '#lib/server/github-stats.js';
 	import { PieChart } from 'layerchart';
 
 	let { stats, comparison_stats = null } = $props<{

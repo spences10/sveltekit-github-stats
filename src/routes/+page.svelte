@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		AdvancedOptions,
+		CommitHeatmap,
 		DailyActivityChart,
 		FormInput,
 		HourDistributionChart,
@@ -11,6 +12,10 @@
 	} from '#lib/components/index.js';
 	import * as Alert from '#lib/components/ui/alert/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
+	import {
+		get_date_range,
+		type QuickDateOption,
+	} from '#lib/date-ranges.js';
 	import { AlertCircle, AlertTriangle } from '#lib/icons/index.js';
 	import type { github_stats_result } from '#lib/server/github-stats.js';
 	import { browser } from '$app/env';
@@ -43,65 +48,8 @@
 		current: StatsPair | null;
 	} | null>(null);
 
-	const calculate_dates = () => {
-		let calculated_since: string;
-		let calculated_until: string;
-
-		if (date_option === 'today') {
-			const today = new SvelteDate().toISOString().split('T')[0];
-			calculated_since = today;
-			calculated_until = today;
-		} else if (date_option === 'yesterday') {
-			const yesterday = new SvelteDate();
-			yesterday.setDate(yesterday.getDate() - 1);
-			const yesterday_iso = yesterday.toISOString().split('T')[0];
-			calculated_since = yesterday_iso;
-			calculated_until = yesterday_iso;
-		} else if (date_option === 'this_week') {
-			const today = new SvelteDate();
-			const day_of_week = today.getDay();
-			const days_since_monday =
-				day_of_week === 0 ? 6 : day_of_week - 1;
-			const start_of_week = new SvelteDate(today);
-			start_of_week.setDate(today.getDate() - days_since_monday);
-			const end_of_week = new SvelteDate(start_of_week);
-			end_of_week.setDate(start_of_week.getDate() + 6);
-			calculated_since = start_of_week.toISOString().split('T')[0];
-			calculated_until = end_of_week.toISOString().split('T')[0];
-		} else if (date_option === 'this_month') {
-			const today = new SvelteDate();
-			calculated_since = new SvelteDate(
-				today.getFullYear(),
-				today.getMonth(),
-				1,
-			)
-				.toISOString()
-				.split('T')[0];
-			calculated_until = new SvelteDate(
-				today.getFullYear(),
-				today.getMonth() + 1,
-				0,
-			)
-				.toISOString()
-				.split('T')[0];
-		} else if (date_option === 'this_year') {
-			const today = new SvelteDate();
-			calculated_since = new SvelteDate(today.getFullYear(), 0, 1)
-				.toISOString()
-				.split('T')[0];
-			calculated_until = new SvelteDate(today.getFullYear(), 11, 31)
-				.toISOString()
-				.split('T')[0];
-		} else if (date_option === 'year') {
-			calculated_since = `${year}-01-01`;
-			calculated_until = `${year}-12-31`;
-		} else {
-			calculated_since = since;
-			calculated_until = until;
-		}
-
-		return { calculated_since, calculated_until };
-	};
+	const calculate_dates = () =>
+		get_date_range(date_option, new SvelteDate(), year, since, until);
 
 	const request_stats = async (
 		handle: string,
@@ -121,7 +69,7 @@
 	const fetch_contributions = async () => {
 		const trimmed_username = username.trim();
 		const trimmed_comparison = comparison_username.trim();
-		if (!trimmed_username) return;
+		if (!trimmed_username || github_query?.loading) return;
 
 		if (browser) {
 			localStorage.setItem('github_username', trimmed_username);
@@ -187,14 +135,8 @@
 		};
 	};
 
-	const handle_quick_date_select = (
-		option:
-			| 'today'
-			| 'yesterday'
-			| 'this_week'
-			| 'this_month'
-			| 'this_year',
-	) => {
+	const handle_quick_date_select = (option: QuickDateOption) => {
+		if (github_query?.loading) return;
 		date_option = option;
 		fetch_contributions();
 	};
@@ -327,6 +269,7 @@
 				/>
 			</div>
 			<QuickDateOptions
+				disabled={github_query?.loading ?? false}
 				on_quick_date_select={handle_quick_date_select}
 				bind:current_date_option={date_option}
 			/>
@@ -402,6 +345,12 @@
 					comparison_stats={github_query.current.comparison}
 				/>
 				{#if github_query.current.primary.since !== github_query.current.primary.until}
+					{#if (new SvelteDate(github_query.current.primary.until).getTime() - new SvelteDate(github_query.current.primary.since).getTime()) / 86400000 >= 7}
+						<CommitHeatmap
+							stats={github_query.current.primary}
+							comparison_stats={github_query.current.comparison}
+						/>
+					{/if}
 					<DailyActivityChart
 						stats={github_query.current.primary}
 						comparison_stats={github_query.current.comparison}

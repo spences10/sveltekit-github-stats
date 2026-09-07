@@ -9,3 +9,4 @@ export { default as RadioOption } from './radio-option.svelte';
 export { default as RepositoryDistributionChart } from './repository-distribution-chart.svelte';
 export { default as StatsOverview } from './stats-overview.svelte';
 export { default as ThemeToggle } from './theme-toggle.svelte';
+export { default as CommitHeatmap } from './commit-heatmap.svelte';

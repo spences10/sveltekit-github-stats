@@ -93,6 +93,22 @@ test('custom-date comparison renders results and remembers handles', async ({
 	await expect(
 		page.getByRole('heading', { name: 'Commits over time' }),
 	).toBeVisible();
+	// Both fixtures have identical daily values: comparison curves must
+	// coincide, rather than adding the second handle to the first.
+	const chart = page.locator('section').filter({
+		has: page.getByRole('heading', { name: 'Commits over time' }),
+	});
+	const lines = chart.locator('path.lc-area-line');
+	await expect(lines).toHaveCount(2);
+	await expect
+		.poll(async () => {
+			const paths = await lines.evaluateAll((elements) =>
+				elements.map((element) => element.getAttribute('d')),
+			);
+			return Boolean(paths[0]) && paths[0] === paths[1];
+		})
+		.toBe(true);
+
 	expect(
 		requests.map((params) => Object.fromEntries(params)),
 	).toEqual([
@@ -164,7 +180,7 @@ test('comparison failure retains primary results and quick dates still work', as
 
 	await page.getByLabel('Compare with', { exact: true }).fill('');
 	await page
-		.getByRole('button', { name: 'Year', exact: true })
+		.getByRole('button', { name: 'This year', exact: true })
 		.click();
 	await expect(
 		page.getByText('Couldn’t load the comparison'),
@@ -172,10 +188,66 @@ test('comparison failure retains primary results and quick dates still work', as
 	await expect(
 		page.getByRole('heading', { name: 'Commits over time' }),
 	).toBeVisible();
-	const year = await page.evaluate(() => new Date().getFullYear());
+	const year = await page.evaluate(() => new Date().getUTCFullYear());
 	expect(Object.fromEntries(requests.at(-1)!)).toEqual({
 		username: 'alice',
 		since: `${year}-01-01`,
-		until: `${year}-12-31`,
+		until: await page.evaluate(() =>
+			new Date().toISOString().slice(0, 10),
+		),
 	});
+});
+
+test('rolling month shows a heatmap; daily and weekly ranges do not', async ({
+	page,
+}) => {
+	const requests = await mock_stats(page);
+	await open_stats(page);
+	await page
+		.getByLabel('GitHub handle', { exact: true })
+		.fill('alice');
+	await page
+		.getByRole('button', { name: 'Last 30 days', exact: true })
+		.click();
+	await expect(
+		page.getByRole('region', {
+			name: 'Commit calendar',
+			exact: true,
+		}),
+	).toBeVisible();
+	await page.getByText('View daily counts', { exact: true }).click();
+	await expect(page.getByRole('table')).toBeVisible();
+	await expect(
+		page.getByRole('table').locator('tbody tr'),
+	).toHaveCount(30);
+	const request = requests.at(-1)!;
+	expect(
+		(Date.parse(request.get('until')!) -
+			Date.parse(request.get('since')!)) /
+			86400000,
+	).toBe(29);
+	await page
+		.getByRole('button', { name: 'Last 7 days', exact: true })
+		.click();
+	await expect(
+		page.getByRole('heading', { name: 'Commits over time' }),
+	).toBeVisible();
+	await expect(
+		page.getByRole('region', {
+			name: 'Commit calendar',
+			exact: true,
+		}),
+	).toHaveCount(0);
+	await page
+		.getByRole('button', { name: 'Today', exact: true })
+		.click();
+	await expect(
+		page.getByRole('heading', { name: 'Commits over time' }),
+	).toHaveCount(0);
+	await expect(
+		page.getByRole('region', {
+			name: 'Commit calendar',
+			exact: true,
+		}),
+	).toHaveCount(0);
 });

@@ -78,6 +78,30 @@ export async function get_github_stats_data(
 				reached_limit = true;
 				break;
 			}
+			const body = await response.json().catch(() => null);
+			const rate_limited =
+				response.status === 429 ||
+				(response.status === 403 &&
+					(response.headers.get('x-ratelimit-remaining') === '0' ||
+						/rate limit/i.test(body?.message ?? '')));
+			if (rate_limited) {
+				const retry_after = Number(
+					response.headers.get('retry-after'),
+				);
+				const reset = Number(
+					response.headers.get('x-ratelimit-reset'),
+				);
+				const seconds =
+					retry_after > 0
+						? retry_after
+						: response.headers.get('x-ratelimit-remaining') === '0' &&
+							  reset > 0
+							? Math.max(1, Math.ceil(reset - Date.now() / 1000))
+							: 60;
+				throw new Error(
+					`GitHub’s request limit was reached. Wait at least ${seconds} seconds before trying again. Larger date ranges and comparisons need more requests; try a shorter range.`,
+				);
+			}
 			throw new Error(
 				`Failed to fetch data from GitHub: ${response.status}`,
 			);

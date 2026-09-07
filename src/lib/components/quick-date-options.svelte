@@ -1,28 +1,18 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
-
+	import {
+		quick_date_options,
+		type QuickDateOption,
+	} from '#lib/date-ranges.js';
 	let {
-		on_quick_date_select = $bindable(),
+		on_quick_date_select,
 		current_date_option = $bindable(),
+		disabled = false,
 	} = $props<{
-		on_quick_date_select: (
-			option:
-				| 'today'
-				| 'yesterday'
-				| 'this_week'
-				| 'this_month'
-				| 'this_year',
-		) => void;
+		on_quick_date_select: (option: QuickDateOption) => void;
 		current_date_option: string;
+		disabled?: boolean;
 	}>();
-
-	const date_options = [
-		{ key: 'today', label: 'Today' },
-		{ key: 'yesterday', label: 'Yesterday' },
-		{ key: 'this_week', label: 'Week' },
-		{ key: 'this_month', label: 'Month' },
-		{ key: 'this_year', label: 'Year' },
-	] as const;
 </script>
 
 <div class="grid gap-3 sm:grid-cols-[6rem_1fr] sm:items-center">
@@ -32,8 +22,9 @@
 		role="group"
 		aria-labelledby="range-label"
 	>
-		{#each date_options as option (option.key)}
+		{#each quick_date_options as option (option.key)}
 			<Button
+				{disabled}
 				aria-pressed={current_date_option === option.key}
 				type="button"
 				variant="ghost"
@@ -51,3 +42,7 @@
 		{/each}
 	</div>
 </div>
+
+<p class="text-base text-muted-foreground sm:text-xs">
+	Dates use UTC. Weeks start Monday. Rolling ranges include today.
+</p>

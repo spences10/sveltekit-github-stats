@@ -104,3 +104,33 @@ describe('GitHub stats runtime', () => {
 		expect(fetch_mock).toHaveBeenCalledTimes(1);
 	});
 });
+
+it('reports secondary rate limits and respects retry-after without retrying', async () => {
+	fetch_mock.mockResolvedValue(
+		Response.json(
+			{ message: 'You have exceeded a secondary rate limit.' },
+			{
+				status: 403,
+				headers: {
+					'retry-after': '120',
+					'x-ratelimit-remaining': '29',
+				},
+			},
+		),
+	);
+	await expect(get_github_stats_data(params)).rejects.toThrow(
+		'Wait at least 120 seconds',
+	);
+	expect(fetch_mock).toHaveBeenCalledTimes(1);
+});
+it('reports primary rate limits from headers even without a JSON body', async () => {
+	fetch_mock.mockResolvedValue(
+		new Response(null, {
+			status: 403,
+			headers: { 'x-ratelimit-remaining': '0' },
+		}),
+	);
+	await expect(get_github_stats_data(params)).rejects.toThrow(
+		'GitHub’s request limit was reached',
+	);
+});

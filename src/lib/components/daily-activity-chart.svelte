@@ -95,6 +95,7 @@
 	<div class="p-3 sm:p-5">
 		<AreaChart
 			data={daily_data}
+			seriesLayout="overlap"
 			x="date"
 			{series}
 			points

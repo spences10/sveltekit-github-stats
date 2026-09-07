@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		AdvancedOptions,
+		ActivityIllustration,
 		CommitHeatmap,
 		DailyActivityChart,
 		FormInput,
@@ -176,44 +177,7 @@
 			count.
 		</p>
 	</div>
-	<div
-		class="relative min-w-0 border-y border-border py-6 max-lg:hidden lg:py-8"
-		aria-hidden="true"
-	>
-		<div
-			class="mb-6 flex justify-between font-mono text-xs text-muted-foreground"
-		>
-			<span>PUBLIC COMMIT ACTIVITY</span><span>↗</span>
-		</div>
-		<div class="grid grid-flow-col grid-rows-7 gap-1.5">
-			{#each Array.from({ length: 126 }, (_, i) => i) as cell (cell)}
-				<span
-					class={[
-						'aspect-square rounded-xs',
-						[
-							'bg-primary/8',
-							'bg-primary/20',
-							'bg-primary/40',
-							'bg-primary/65',
-							'bg-primary',
-						][((cell * 13 + Math.floor(cell / 7) * 7) % 17) % 5],
-					]}
-				></span>
-			{/each}
-		</div>
-		<div
-			class="mt-5 flex items-center justify-between font-mono text-xs text-muted-foreground"
-		>
-			<span>Illustration · not live data</span><span
-				class="flex gap-1"
-				><span class="size-2.5 bg-primary/15"></span><span
-					class="size-2.5 bg-primary/40"
-				></span><span class="size-2.5 bg-primary/70"></span><span
-					class="size-2.5 bg-primary"
-				></span></span
-			>
-		</div>
-	</div>
+	<ActivityIllustration class="max-lg:hidden" />
 </section>
 
 <section

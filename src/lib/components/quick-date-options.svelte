@@ -25,8 +25,8 @@
 	] as const;
 </script>
 
-<div class="grid gap-3 sm:grid-cols-[5rem_1fr] sm:items-center">
-	<span class="section-kicker" id="range-label">Range</span>
+<div class="grid gap-3 sm:grid-cols-[6rem_1fr] sm:items-center">
+	<span class="section-kicker" id="range-label">Time frame</span>
 	<div
 		class="flex flex-wrap gap-x-1 gap-y-2"
 		role="group"
@@ -34,11 +34,12 @@
 	>
 		{#each date_options as option (option.key)}
 			<Button
+				aria-pressed={current_date_option === option.key}
 				type="button"
 				variant="ghost"
 				size="sm"
 				class={[
-					'h-8 rounded-md px-3 font-normal',
+					'h-10 rounded-md px-4 font-medium',
 					current_date_option === option.key
 						? 'bg-accent text-accent-foreground hover:bg-accent/80'
 						: 'text-muted-foreground',

@@ -211,73 +211,156 @@
 	});
 </script>
 
-<section>
-	<header class="max-w-2xl">
-		<h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
-			SvelteKit GitHub Stats
-		</h1>
-		<p class="mt-4 text-lg leading-8 text-muted-foreground">
-			See public commit activity for one GitHub user, or put two
-			handles side by side.
-		</p>
-	</header>
-
-	<form class="panel mt-8 overflow-hidden" onsubmit={handle_submit}>
-		<div
-			class="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1fr_auto_1fr] lg:items-end"
+<section
+	class="grid gap-10 pb-10 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-16 lg:pb-14"
+>
+	<div>
+		<p
+			class="mb-5 flex items-center gap-2 font-mono text-xs tracking-wide text-muted-foreground uppercase"
 		>
-			<FormInput
-				id="username"
-				name="username"
-				label="GitHub handle"
-				placeholder="spences10"
-				class="h-11 text-base"
-				bind:value={username}
-				required
-			/>
-			<span
-				class="hidden pb-3 text-xs font-semibold text-muted-foreground uppercase lg:block"
-			>
-				vs
-			</span>
-			<FormInput
-				id="comparison_username"
-				name="comparison_username"
-				label="Compare with"
-				placeholder="Optional second handle"
-				class="h-11 text-base"
-				bind:value={comparison_username}
-			/>
+			<span class="size-2 rounded-full bg-primary"></span> Public GitHub
+			commit stats
+		</p>
+		<h1
+			class="max-w-[20ch] text-5xl font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl"
+		>
+			Check your<br />GitHub commits.
+		</h1>
+		<p
+			class="mt-6 max-w-[48ch] text-base/7 text-pretty text-muted-foreground sm:text-lg/8"
+		>
+			See how many public commits you’ve made today, without digging
+			through your GitHub profile. Enter your handle to check your
+			count.
+		</p>
+	</div>
+	<div
+		class="relative min-w-0 border-y border-border py-6 max-lg:hidden lg:py-8"
+		aria-hidden="true"
+	>
+		<div
+			class="mb-6 flex justify-between font-mono text-xs text-muted-foreground"
+		>
+			<span>PUBLIC COMMIT ACTIVITY</span><span>↗</span>
 		</div>
+		<div class="grid grid-flow-col grid-rows-7 gap-1.5">
+			{#each Array.from({ length: 126 }, (_, i) => i) as cell (cell)}
+				<span
+					class={[
+						'aspect-square rounded-xs',
+						[
+							'bg-primary/8',
+							'bg-primary/20',
+							'bg-primary/40',
+							'bg-primary/65',
+							'bg-primary',
+						][((cell * 13 + Math.floor(cell / 7) * 7) % 17) % 5],
+					]}
+				></span>
+			{/each}
+		</div>
+		<div
+			class="mt-5 flex items-center justify-between font-mono text-xs text-muted-foreground"
+		>
+			<span>Illustration · not live data</span><span
+				class="flex gap-1"
+				><span class="size-2.5 bg-primary/15"></span><span
+					class="size-2.5 bg-primary/40"
+				></span><span class="size-2.5 bg-primary/70"></span><span
+					class="size-2.5 bg-primary"
+				></span></span
+			>
+		</div>
+	</div>
+</section>
 
-		<div class="grid gap-5 border-t bg-muted/25 p-5 sm:p-6">
+<section
+	aria-labelledby="explore-heading"
+	class="overflow-hidden rounded-xl border bg-card"
+>
+	<div class="grid lg:grid-cols-[1fr_3fr]">
+		<div
+			class="border-b bg-muted/40 p-6 sm:p-8 lg:border-r lg:border-b-0"
+		>
+			<p
+				class="font-mono text-xs tracking-wide text-primary uppercase"
+			>
+				01 / Explore
+			</p>
+			<h2
+				id="explore-heading"
+				class="mt-4 text-2xl font-medium tracking-tight text-balance"
+			>
+				Start with<br class="max-lg:hidden" /> a handle.
+			</h2>
+			<p
+				class="mt-3 max-w-[28ch] text-base/6 text-pretty text-muted-foreground max-sm:hidden sm:text-sm/6"
+			>
+				Enter one or two GitHub handles and choose a date range to
+				view their public commit counts.
+			</p>
+			<p
+				class="mt-6 flex items-center gap-2 font-mono text-xs text-muted-foreground max-sm:hidden"
+			>
+				<span class="size-1.5 rounded-full bg-primary"></span>No
+				sign-in required
+			</p>
+		</div>
+		<form class="grid gap-6 p-6 sm:p-8" onsubmit={handle_submit}>
+			<div class="grid gap-5 sm:grid-cols-2">
+				<FormInput
+					id="username"
+					name="username"
+					label="GitHub handle"
+					placeholder="e.g. spences10"
+					class="h-12 bg-background font-mono text-base shadow-none"
+					bind:value={username}
+					required
+				/>
+				<FormInput
+					id="comparison_username"
+					name="comparison_username"
+					label="Compare with"
+					placeholder="Second handle (optional)"
+					class="h-12 bg-background font-mono text-base shadow-none"
+					bind:value={comparison_username}
+				/>
+			</div>
 			<QuickDateOptions
 				on_quick_date_select={handle_quick_date_select}
 				bind:current_date_option={date_option}
 			/>
-
 			<AdvancedOptions
 				bind:date_option
 				bind:year
 				bind:since
 				bind:until
 			/>
-
-			<div class="flex justify-end">
+			<div
+				class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+			>
+				<p class="text-base text-muted-foreground sm:text-xs">
+					Public commits. Handles saved on this device.
+				</p>
 				<Button
 					type="submit"
 					size="lg"
-					class="h-11 min-w-36 px-5"
+					class="h-12 gap-6 rounded-md px-6 text-base sm:text-sm"
 					disabled={github_query?.loading}
+					>{github_query?.loading ? 'Loading…' : 'Show stats'}<span
+						aria-hidden="true">↗</span
+					></Button
 				>
-					{github_query?.loading ? 'Loading…' : 'Show stats'}
-				</Button>
 			</div>
-		</div>
-	</form>
+		</form>
+	</div>
 </section>
 
-<div class="mt-10 min-w-0">
+<div
+	class="mt-10 min-w-0"
+	aria-live="polite"
+	aria-busy={github_query?.loading ?? false}
+>
 	{#if github_query}
 		{#if github_query.error}
 			<Alert.Root variant="destructive">
@@ -337,12 +420,21 @@
 			</div>
 		{/if}
 	{:else}
-		<section class="mt-10 border-t py-8">
-			<h2 class="text-sm font-medium">Start with a GitHub handle.</h2>
-			<p class="mt-1 text-sm text-muted-foreground">
-				The comparison handle is optional, and both are saved on this
-				device.
-			</p>
+		<section
+			aria-label="What you can explore"
+			class="grid gap-8 py-3 md:grid-cols-3 md:gap-10"
+		>
+			{#each [['01', 'Counts by date and hour', 'See daily commit totals and how commits are distributed across UTC hours.'], ['02', 'Counts by repository', 'See how many public commits were made to each repository in your selected range.'], ['03', 'Compare two handles', 'View public commit counts for two GitHub users over the same date range.']] as [number, title, description] (number)}
+				<div class="border-t pt-5">
+					<p class="mb-4 font-mono text-xs text-primary">/{number}</p>
+					<h3 class="text-base font-medium text-balance">{title}</h3>
+					<p
+						class="mt-2 max-w-[40ch] text-base/7 text-pretty text-muted-foreground sm:text-sm/6"
+					>
+						{description}
+					</p>
+				</div>
+			{/each}
 		</section>
 	{/if}
 </div>

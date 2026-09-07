@@ -2,6 +2,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { ThemeToggle } from '#lib/components/index.js';
 	import { resolve } from '$app/paths';
+	import '@fontsource-variable/inter';
 	import '../app.css';
 
 	let { children } = $props();
@@ -9,48 +10,61 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>SvelteKit GitHub Stats</title>
+	<title>SvelteKit GitHub stats</title>
 	<meta
 		name="description"
-		content="Explore and compare public GitHub commit activity with SvelteKit."
+		content="Quickly check how many public GitHub commits you’ve made today. Enter your handle to see your count, or choose another date range."
 	/>
 </svelte:head>
 
-<div class="min-h-dvh">
-	<header class="border-b bg-card">
+<div class="flex min-h-dvh flex-col">
+	<a
+		href="#main"
+		class="sr-only z-50 bg-card p-3 focus:not-sr-only focus:absolute"
+		>Skip to content</a
+	>
+	<header>
 		<div
-			class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+			class="mx-auto flex max-w-7xl items-center justify-between gap-4 border-b px-5 py-5 sm:px-8 lg:px-10"
 		>
 			<a
 				href={resolve('/')}
-				class="flex items-center gap-2.5 text-sm font-semibold"
-				aria-label="SvelteKit GitHub Stats home"
+				class="flex min-w-0 items-center gap-3"
+				aria-label="SvelteKit GitHub stats home"
 			>
+				<img src={favicon} alt="" class="size-9 shrink-0" />
 				<span
-					class="grid size-7 place-items-center rounded-md bg-primary font-mono text-xs font-bold text-primary-foreground"
-					aria-hidden="true"
+					class="text-sm font-semibold tracking-tight sm:text-base"
+					>SvelteKit <span class="font-normal">GitHub stats</span
+					></span
 				>
-					S
-				</span>
-				<span class="hidden sm:inline">SvelteKit GitHub Stats</span>
 			</a>
-			<ThemeToggle />
+			<div class="flex items-center gap-5">
+				<span
+					class="font-mono text-xs text-muted-foreground max-sm:hidden"
+					>Public commit counts</span
+				>
+				<ThemeToggle />
+			</div>
 		</div>
 	</header>
-
-	<main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+	<main
+		id="main"
+		class="mx-auto w-full max-w-7xl flex-1 px-5 py-12 sm:px-8 sm:py-16 lg:px-10"
+	>
 		{@render children?.()}
 	</main>
-
 	<footer
-		class="mx-auto flex max-w-7xl flex-col gap-2 border-t px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+		class="mx-auto flex w-full max-w-7xl flex-col gap-3 border-t px-5 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10"
 	>
-		<a
-			class="w-fit text-foreground underline-offset-4 hover:underline"
-			href="https://scottspence.com"
+		<p>
+			Made with SvelteKit by <a
+				class="text-foreground underline-offset-4 hover:underline"
+				href="https://scottspence.com">Scott Spence ↗</a
+			>
+		</p>
+		<span class="font-mono text-xs"
+			>Powered by public GitHub data</span
 		>
-			Scott Spence
-		</a>
-		<span>Public commit data from GitHub</span>
 	</footer>
 </div>

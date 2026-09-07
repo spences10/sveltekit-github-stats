@@ -13,15 +13,13 @@
 
 <details class="group border-t pt-4">
 	<summary
-		class="flex cursor-pointer list-none items-center justify-between text-sm text-muted-foreground marker:hidden hover:text-foreground"
+		class="flex cursor-pointer list-none items-center justify-between py-1 text-base text-muted-foreground marker:hidden hover:text-foreground sm:text-sm"
 	>
 		<span>Specific year or custom dates</span>
 		<span class="transition-transform group-open:rotate-45">+</span>
 	</summary>
 
-	<div
-		class="mt-5 grid gap-4 rounded-md border bg-background p-4 sm:ml-20"
-	>
+	<div class="mt-5 grid gap-4 rounded-md border bg-background p-4">
 		<div class="grid gap-2 sm:grid-cols-2">
 			<RadioOption
 				name="date_option"

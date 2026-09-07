@@ -45,7 +45,7 @@
 	);
 </script>
 
-<section class="panel min-w-0 overflow-hidden">
+<section class="panel @container min-w-0 overflow-hidden">
 	<header class="panel-header">
 		<div>
 			<p class="section-kicker">Repository mix</p>
@@ -53,13 +53,13 @@
 		</div>
 	</header>
 
-	<div class={datasets.length > 1 ? 'grid md:grid-cols-2' : 'grid'}>
-		{#each datasets as dataset, dataset_index (dataset.result.username)}
+	<div class={datasets.length > 1 ? 'grid @lg:grid-cols-2' : 'grid'}>
+		{#each datasets as dataset, dataset_index (dataset_index)}
 			<div
 				class={[
 					'p-5 sm:p-6',
 					dataset_index > 0
-						? 'border-t md:border-t-0 md:border-l'
+						? 'border-t @lg:border-t-0 @lg:border-l'
 						: '',
 				]}
 			>
@@ -95,7 +95,7 @@
 						</div>
 					</div>
 
-					<ul class="mt-3 grid gap-2 text-xs">
+					<ul class="mt-3 grid gap-3 text-base sm:text-sm">
 						{#each dataset.data as item (item.key)}
 							<li class="flex min-w-0 items-center gap-2">
 								<span

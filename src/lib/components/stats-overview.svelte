@@ -30,81 +30,81 @@
 	);
 </script>
 
-<section class="panel overflow-hidden">
+<section class="overflow-hidden rounded-xl border bg-card">
 	<header class="panel-header items-center">
 		<div>
-			<p class="section-kicker">Results</p>
-			<h2 class="mt-1 text-sm font-medium">
+			<p class="section-kicker">02 / The overview</p>
+			<h2 class="mt-2 text-lg font-medium text-balance">
 				{format_date(stats.since)}–{format_date(stats.until)}
 			</h2>
 		</div>
 		{#if comparison_stats}
-			<p class="text-sm text-muted-foreground">
-				<span class="font-medium text-foreground">
-					{Math.abs(difference).toLocaleString()}
-				</span>
+			<p
+				class="rounded-md bg-muted px-3 py-2 text-base text-muted-foreground sm:text-sm"
+			>
+				<span class="font-medium text-foreground"
+					>{Math.abs(difference).toLocaleString()}</span
+				>
 				commit{Math.abs(difference) === 1 ? '' : 's'} apart
 			</p>
 		{/if}
 	</header>
-
-	<div class={comparison_stats ? 'grid md:grid-cols-2' : 'grid'}>
-		<div class="p-5 sm:p-6 md:border-r">
-			<p class="flex items-center gap-2 text-sm font-medium">
-				<span class="size-2 rounded-full bg-chart-1"></span>
-				@{stats.username}
-			</p>
-			<p
-				class="metric-number mt-4 text-5xl font-semibold tracking-tight sm:text-6xl"
+	{#each [stats, ...(comparison_stats ? [comparison_stats] : [])] as result, index (index)}
+		<div class="@container border-t first-of-type:border-t-0">
+			<div
+				class="grid gap-6 p-6 sm:p-8 @xl:grid-cols-[1fr_2fr] @xl:items-center"
 			>
-				{stats.total_commits.toLocaleString()}
-			</p>
-			<p class="mt-1 text-sm text-muted-foreground">public commits</p>
-			<div class="mt-6 flex gap-6 border-t pt-4 text-sm">
-				<p>
-					<span class="metric-number block font-semibold">
-						{stats.repositories.length.toLocaleString()}
-					</span>
-					<span class="text-muted-foreground">repositories</span>
+				<p
+					class="flex min-w-0 items-center gap-2 font-mono text-base sm:text-sm"
+				>
+					<span
+						class={[
+							'size-2 shrink-0 rounded-full',
+							index === 0 ? 'bg-chart-1' : 'bg-chart-2',
+						]}
+					></span><span class="truncate">@{result.username}</span>
 				</p>
-				<p>
-					<span class="metric-number block font-semibold">
-						{get_daily_average(stats)}
-					</span>
-					<span class="text-muted-foreground">per day</span>
-				</p>
+				<dl class="grid grid-cols-[3fr_2fr_2fr] gap-4">
+					<div>
+						<dt class="truncate text-sm text-muted-foreground">
+							Public commits
+						</dt>
+						<dd
+							class="mt-2 text-4xl font-medium tracking-tight tabular-nums @xl:text-5xl"
+						>
+							{result.total_commits.toLocaleString()}
+						</dd>
+					</div>
+					<div>
+						<dt class="truncate text-sm text-muted-foreground">
+							Repositories
+						</dt>
+						<dd
+							class="mt-2 text-4xl font-medium tracking-tight tabular-nums @xl:text-5xl"
+						>
+							{result.repositories.length.toLocaleString()}
+						</dd>
+					</div>
+					<div>
+						<dt class="truncate text-sm text-muted-foreground">
+							Per day
+						</dt>
+						<dd
+							class="mt-2 text-4xl font-medium tracking-tight tabular-nums @xl:text-5xl"
+						>
+							{get_daily_average(result)}
+						</dd>
+					</div>
+				</dl>
 			</div>
 		</div>
-
-		{#if comparison_stats}
-			<div class="border-t p-5 sm:p-6 md:border-t-0">
-				<p class="flex items-center gap-2 text-sm font-medium">
-					<span class="size-2 rounded-full bg-chart-2"></span>
-					@{comparison_stats.username}
-				</p>
-				<p
-					class="metric-number mt-4 text-5xl font-semibold tracking-tight sm:text-6xl"
-				>
-					{comparison_stats.total_commits.toLocaleString()}
-				</p>
-				<p class="mt-1 text-sm text-muted-foreground">
-					public commits
-				</p>
-				<div class="mt-6 flex gap-6 border-t pt-4 text-sm">
-					<p>
-						<span class="metric-number block font-semibold">
-							{comparison_stats.repositories.length.toLocaleString()}
-						</span>
-						<span class="text-muted-foreground">repositories</span>
-					</p>
-					<p>
-						<span class="metric-number block font-semibold">
-							{get_daily_average(comparison_stats)}
-						</span>
-						<span class="text-muted-foreground">per day</span>
-					</p>
-				</div>
-			</div>
-		{/if}
-	</div>
+	{/each}
+	{#if stats.total_commits === 0}
+		<p
+			class="border-t px-6 py-4 text-base text-muted-foreground sm:px-8 sm:text-sm"
+		>
+			No public commits found for @{stats.username} in this range. Try a
+			wider time frame.
+		</p>
+	{/if}
 </section>

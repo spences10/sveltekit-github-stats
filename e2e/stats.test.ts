@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import type { github_stats_result } from '#lib/server/github-stats.js';
+import type { github_stats_response } from '#lib/server/github-stats-cache.js';
 
 test.use({ timezoneId: 'UTC' });
 
@@ -35,9 +35,10 @@ function stats(username: string, since: string, until: string) {
 			hour,
 			count: hour === 12 ? 3 : 0,
 		})),
+		fetched_at: '2026-09-07T12:00:00.000Z',
 		reached_limit: false,
 		note: null,
-	} satisfies github_stats_result;
+	} satisfies github_stats_response;
 }
 
 async function mock_stats(page: Page, failing_user?: string) {
@@ -84,6 +85,14 @@ test('custom-date comparison renders results and remembers handles', async ({
 	await page.getByRole('button', { name: 'Show stats' }).click();
 
 	await expect(page.getByText('7 commits apart')).toBeVisible();
+	await expect(
+		page.locator('time[datetime="2026-09-07T12:00:00.000Z"]'),
+	).toHaveCount(2);
+	await expect(
+		page
+			.getByText('Updated 7 Sept, 12:00:00 UTC', { exact: true })
+			.first(),
+	).toBeVisible();
 	await expect(
 		page.getByText('@alice', { exact: true }).first(),
 	).toBeVisible();

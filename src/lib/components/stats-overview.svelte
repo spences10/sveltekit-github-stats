@@ -1,9 +1,14 @@
 <script lang="ts">
+	import type { github_stats_response } from '#lib/server/github-stats-cache.js';
 	import type { github_stats_result } from '#lib/server/github-stats.js';
 
 	let { stats, comparison_stats = null } = $props<{
-		stats: github_stats_result;
-		comparison_stats?: github_stats_result | null;
+		stats: github_stats_result &
+			Partial<Pick<github_stats_response, 'fetched_at'>>;
+		comparison_stats?:
+			| (github_stats_result &
+					Partial<Pick<github_stats_response, 'fetched_at'>>)
+			| null;
 	}>();
 
 	const format_date = (date: string) =>
@@ -54,16 +59,34 @@
 			<div
 				class="grid gap-6 p-6 sm:p-8 @xl:grid-cols-[1fr_2fr] @xl:items-center"
 			>
-				<p
-					class="flex min-w-0 items-center gap-2 font-mono text-base sm:text-sm"
-				>
-					<span
-						class={[
-							'size-2 shrink-0 rounded-full',
-							index === 0 ? 'bg-chart-1' : 'bg-chart-2',
-						]}
-					></span><span class="truncate">@{result.username}</span>
-				</p>
+				<div class="min-w-0">
+					<p
+						class="flex min-w-0 items-center gap-2 font-mono text-base sm:text-sm"
+					>
+						<span
+							class={[
+								'size-2 shrink-0 rounded-full',
+								index === 0 ? 'bg-chart-1' : 'bg-chart-2',
+							]}
+						></span><span class="truncate">@{result.username}</span>
+					</p>
+					{#if result.fetched_at}
+						<p
+							class="mt-2 text-base text-muted-foreground sm:text-xs"
+						>
+							Updated <time datetime={result.fetched_at}
+								>{new Intl.DateTimeFormat('en-GB', {
+									day: 'numeric',
+									month: 'short',
+									hour: '2-digit',
+									minute: '2-digit',
+									second: '2-digit',
+									timeZone: 'UTC',
+								}).format(new Date(result.fetched_at))} UTC</time
+							>
+						</p>
+					{/if}
+				</div>
 				<dl class="grid grid-cols-[3fr_2fr_2fr] gap-4">
 					<div>
 						<dt class="truncate text-sm text-muted-foreground">

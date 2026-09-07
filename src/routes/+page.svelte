@@ -17,15 +17,15 @@
 		type QuickDateOption,
 	} from '#lib/date-ranges.js';
 	import { AlertCircle, AlertTriangle } from '#lib/icons/index.js';
-	import type { github_stats_result } from '#lib/server/github-stats.js';
+	import type { github_stats_response } from '#lib/server/github-stats-cache.js';
 	import { browser } from '$app/env';
 	import { onMount, untrack } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';
 
 	type StatsPair = {
-		primary: github_stats_result;
-		comparison: github_stats_result | null;
+		primary: github_stats_response;
+		comparison: github_stats_response | null;
 	};
 
 	let { data } = $props<{ data: PageData }>();
@@ -63,7 +63,7 @@
 		});
 		const response = await fetch(`/api/github-stats?${params}`);
 		if (!response.ok) throw new Error(await response.text());
-		return (await response.json()) as github_stats_result;
+		return (await response.json()) as github_stats_response;
 	};
 
 	const fetch_contributions = async () => {

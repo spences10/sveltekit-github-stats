@@ -134,3 +134,71 @@ it('reports primary rate limits from headers even without a JSON body', async ()
 		'GitHub’s request limit was reached',
 	);
 });
+
+const page_items = (count: number) =>
+	Array.from({ length: count }, () => ({
+		repository: {
+			full_name: 'alice/demo',
+			html_url: 'https://github.com/alice/demo',
+		},
+		commit: { author: { date: '2026-08-01T09:00:00Z' } },
+	}));
+
+it.each([100, 200, 1000])(
+	'stops after fetching exactly %i commits',
+	async (total) => {
+		fetch_mock.mockImplementation(async () =>
+			Response.json({
+				total_count: total,
+				incomplete_results: false,
+				items: page_items(100),
+			}),
+		);
+		const result = await get_github_stats_data(params);
+		expect(fetch_mock).toHaveBeenCalledTimes(total / 100);
+		expect(result.total_commits).toBe(total);
+		expect(result.reached_limit).toBe(false);
+	},
+);
+it('keeps the 1000-result cap for larger searches', async () => {
+	fetch_mock.mockImplementation(async () =>
+		Response.json({
+			total_count: 1200,
+			incomplete_results: false,
+			items: page_items(100),
+		}),
+	);
+	const result = await get_github_stats_data(params);
+	expect(fetch_mock).toHaveBeenCalledTimes(10);
+	expect(result.total_commits).toBe(1000);
+	expect(result.reached_limit).toBe(true);
+});
+it('rejects 422 instead of returning a cacheable zero', async () => {
+	fetch_mock.mockResolvedValue(
+		Response.json({ message: 'Validation Failed' }, { status: 422 }),
+	);
+	await expect(get_github_stats_data(params)).rejects.toThrow(
+		'could not process this search',
+	);
+	expect(fetch_mock).toHaveBeenCalledTimes(1);
+});
+it('rejects incomplete search pages, including after a successful page', async () => {
+	fetch_mock.mockResolvedValueOnce(
+		Response.json({
+			total_count: 200,
+			incomplete_results: false,
+			items: page_items(100),
+		}),
+	);
+	fetch_mock.mockResolvedValueOnce(
+		Response.json({
+			total_count: 200,
+			incomplete_results: true,
+			items: page_items(20),
+		}),
+	);
+	await expect(get_github_stats_data(params)).rejects.toThrow(
+		'incomplete search results',
+	);
+	expect(fetch_mock).toHaveBeenCalledTimes(2);
+});

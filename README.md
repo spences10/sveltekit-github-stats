@@ -74,13 +74,15 @@ instance. Identical in-flight requests share a promise within that
 instance; this is not a global request lock across Workers or data
 centres.
 
-Failures are not cached, and a cache read/write failure falls back to
-the live result. Cache keys are versioned and scoped to the request
-origin and a SHA-256 fingerprint of the server token, so a token
-rotation cannot reuse old entries. The token itself is never stored in
-a cache key or response. HTTP responses use `Cache-Control: no-store`;
-only the explicit server cache stores results, keeping the expiry
-policy in one place.
+Failures are not cached, including GitHub 422 responses and searches
+marked `incomplete_results`. A cache read/write failure falls back to
+the live result. Stored entries are validated against the result
+schema and requested handle/dates before reuse. Cache keys are
+versioned and scoped to the request origin and a SHA-256 fingerprint
+of the server token, so a token rotation cannot reuse old entries. The
+token itself is never stored in a cache key or response. HTTP
+responses use `Cache-Control: no-store`; only the explicit server
+cache stores results, keeping the expiry policy in one place.
 
 To review: fetch a range twice before its expiry and check that its
 “Updated” timestamp stays the same. After expiry, the next request

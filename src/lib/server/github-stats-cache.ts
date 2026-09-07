@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import {
 	github_params_schema,
+	github_stats_schema,
 	type github_params,
 	type github_stats_result,
 } from './github-stats.js';
@@ -8,10 +9,14 @@ import {
 export type github_stats_response = github_stats_result & {
 	fetched_at: string;
 };
-type CacheEntry = {
-	result: github_stats_response;
-	expires_at: number;
-};
+const cache_entry_schema = v.object({
+	result: v.object({
+		...github_stats_schema.entries,
+		fetched_at: v.pipe(v.string(), v.isoTimestamp()),
+	}),
+	expires_at: v.pipe(v.number(), v.finite()),
+});
+type CacheEntry = v.InferOutput<typeof cache_entry_schema>;
 export type StatsCacheStorage = Pick<Cache, 'match' | 'put'>;
 type CacheOptions = {
 	origin: string;
@@ -53,7 +58,7 @@ export function create_stats_cache(
 				'The start date must be on or before the end date.',
 			);
 		const key_url = new URL(
-			`/__github-stats-cache/v1/${options.namespace}`,
+			`/__github-stats-cache/v2/${options.namespace}`,
 			options.origin,
 		);
 		key_url.search = new URLSearchParams(params).toString();
@@ -70,10 +75,15 @@ export function create_stats_cache(
 			try {
 				const response = await options.storage?.match(key);
 				if (response?.ok) {
-					const entry = (await response.json()) as CacheEntry;
+					const entry = v.parse(
+						cache_entry_schema,
+						await response.json(),
+					);
 					if (
 						entry.expires_at > Date.now() &&
-						entry.result?.fetched_at
+						entry.result.username === params.username &&
+						entry.result.since === params.since &&
+						entry.result.until === params.until
 					) {
 						remember(key, entry);
 						return entry.result;

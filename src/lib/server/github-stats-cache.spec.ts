@@ -203,3 +203,43 @@ describe('GitHub stats caching', () => {
 		expect(load).toHaveBeenCalledTimes(52);
 	});
 });
+
+it.each([
+	{
+		result: { fetched_at: '2026-09-07T12:00:00.000Z' },
+	},
+	{
+		result: { ...result, fetched_at: 'not-a-date' },
+	},
+	{
+		result: {
+			...result,
+			username: 'bob',
+			fetched_at: '2026-09-07T12:00:00.000Z',
+		},
+	},
+	{
+		result: {
+			...result,
+			until: '2026-09-08',
+			fetched_at: '2026-09-07T12:00:00.000Z',
+		},
+	},
+])(
+	'ignores malformed or mismatched edge entries: %j',
+	async (entry) => {
+		const load = loader();
+		const get = create_stats_cache(load);
+		const storage = {
+			match: vi.fn(async () =>
+				Response.json({ ...entry, expires_at: Date.now() + 60000 }),
+			),
+			put: vi.fn(async () => {}),
+		};
+		expect(
+			(await get(params, { ...options, storage })).total_commits,
+		).toBe(6);
+		expect(load).toHaveBeenCalledTimes(1);
+		expect(storage.put).toHaveBeenCalledTimes(1);
+	},
+);

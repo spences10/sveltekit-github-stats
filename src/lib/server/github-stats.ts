@@ -8,7 +8,7 @@ const repo_contribution_schema = v.object({
 	last_updated: v.string(),
 });
 
-const github_stats_schema = v.object({
+export const github_stats_schema = v.object({
 	username: v.string(),
 	total_commits: v.number(),
 	since: v.string(),
@@ -43,6 +43,7 @@ type github_commit_search_item = {
 type github_commit_search_response = {
 	items: github_commit_search_item[];
 	total_count: number;
+	incomplete_results?: boolean;
 };
 
 export async function get_github_stats_data(
@@ -75,8 +76,9 @@ export async function get_github_stats_data(
 
 		if (!response.ok) {
 			if (response.status === 422) {
-				reached_limit = true;
-				break;
+				throw new Error(
+					'GitHub could not process this search (422). Check the handle and date range, then try again.',
+				);
 			}
 			const body = await response.json().catch(() => null);
 			const rate_limited =
@@ -109,11 +111,19 @@ export async function get_github_stats_data(
 
 		const data =
 			(await response.json()) as github_commit_search_response;
+		if (data.incomplete_results) {
+			throw new Error(
+				'GitHub returned incomplete search results. Try again later or choose a shorter date range.',
+			);
+		}
 		all_items = all_items.concat(data.items);
 		total_count = Math.min(data.total_count, 1000);
 
-		if (data.items.length < per_page || all_items.length >= 1000) {
-			reached_limit = all_items.length >= 1000;
+		if (
+			data.items.length < per_page ||
+			all_items.length >= total_count
+		) {
+			reached_limit = data.total_count > 1000;
 			break;
 		}
 	}

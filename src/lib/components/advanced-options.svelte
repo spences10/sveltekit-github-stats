@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ChevronDown } from '@lucide/svelte';
 	import DateRange from './date-range.svelte';
 	import FormInput from './form-input.svelte';
 	import RadioOption from './radio-option.svelte';
@@ -16,7 +17,10 @@
 		class="flex cursor-pointer list-none items-center justify-between py-1 text-base text-muted-foreground marker:hidden hover:text-foreground sm:text-sm"
 	>
 		<span>Specific year or custom dates</span>
-		<span class="transition-transform group-open:rotate-45">+</span>
+		<ChevronDown
+			class="size-4 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
+			aria-hidden="true"
+		/>
 	</summary>
 
 	<div class="mt-5 grid gap-4 rounded-md border bg-background p-4">

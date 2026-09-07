@@ -3,6 +3,7 @@
 	import { ThemeToggle } from '#lib/components/index.js';
 	import { resolve } from '$app/paths';
 	import '@fontsource-variable/inter';
+	import { ArrowUpRight } from '@lucide/svelte';
 	import '../app.css';
 
 	let { children } = $props();
@@ -21,8 +22,9 @@
 	<a
 		href="#main"
 		class="sr-only z-50 bg-card p-3 focus:not-sr-only focus:absolute"
-		>Skip to content</a
 	>
+		Skip to content
+	</a>
 	<header>
 		<div
 			class="mx-auto flex max-w-7xl items-center justify-between gap-4 border-b px-5 py-5 sm:px-8 lg:px-10"
@@ -35,15 +37,18 @@
 				<img src={favicon} alt="" class="size-9 shrink-0" />
 				<span
 					class="text-sm font-semibold tracking-tight sm:text-base"
-					>SvelteKit <span class="font-normal">GitHub stats</span
-					></span
+				>
+					SvelteKit <span class="font-normal">
+						GitHub stats
+					</span></span
 				>
 			</a>
 			<div class="flex items-center gap-5">
 				<span
 					class="font-mono text-xs text-muted-foreground max-sm:hidden"
-					>Public commit counts</span
 				>
+					Public commit counts
+				</span>
 				<ThemeToggle />
 			</div>
 		</div>
@@ -59,12 +64,15 @@
 	>
 		<p>
 			Made with SvelteKit by <a
-				class="text-foreground underline-offset-4 hover:underline"
-				href="https://scottspence.com">Scott Spence ↗</a
+				class="inline-flex items-center gap-1 text-foreground underline-offset-4 hover:underline"
+				href="https://scottspence.com"
 			>
+				Scott Spence
+				<ArrowUpRight class="size-4 shrink-0" aria-hidden="true" />
+			</a>
 		</p>
-		<span class="font-mono text-xs"
-			>Powered by public GitHub data</span
-		>
+		<span class="font-mono text-xs">
+			Powered by public GitHub data
+		</span>
 	</footer>
 </div>

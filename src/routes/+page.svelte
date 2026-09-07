@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
-		AdvancedOptions,
 		ActivityIllustration,
+		AdvancedOptions,
 		CommitHeatmap,
 		DailyActivityChart,
 		FormInput,
@@ -20,6 +20,7 @@
 	import { AlertCircle, AlertTriangle } from '#lib/icons/index.js';
 	import type { github_stats_response } from '#lib/server/github-stats-cache.js';
 	import { browser } from '$app/env';
+	import { ArrowRight } from '@lucide/svelte';
 	import { onMount, untrack } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import type { PageData } from './$types';
@@ -254,10 +255,10 @@
 					size="lg"
 					class="h-12 gap-6 rounded-md px-6 text-base sm:text-sm"
 					disabled={github_query?.loading}
-					>{github_query?.loading ? 'Loading…' : 'Show stats'}<span
-						aria-hidden="true">↗</span
-					></Button
 				>
+					{github_query?.loading ? 'Loading…' : 'Show stats'}
+					<ArrowRight class="size-4 shrink-0" aria-hidden="true" />
+				</Button>
 			</div>
 		</form>
 	</div>
@@ -273,9 +274,9 @@
 			<Alert.Root variant="destructive">
 				<AlertCircle class_names="h-5 w-5" />
 				<Alert.Title>Couldn’t fetch commits</Alert.Title>
-				<Alert.Description
-					>{github_query.error.message}</Alert.Description
-				>
+				<Alert.Description>
+					{github_query.error.message}
+				</Alert.Description>
 			</Alert.Root>
 		{:else if github_query.loading}
 			<LoadingSkeleton />
@@ -285,18 +286,18 @@
 					<Alert.Root variant="destructive">
 						<AlertCircle class_names="h-5 w-5" />
 						<Alert.Title>Couldn’t load the comparison</Alert.Title>
-						<Alert.Description
-							>{comparison_error.message}</Alert.Description
-						>
+						<Alert.Description>
+							{comparison_error.message}
+						</Alert.Description>
 					</Alert.Root>
 				{/if}
 
 				{#if github_query.current.primary.reached_limit || github_query.current.comparison?.reached_limit}
 					<Alert.Root>
 						<AlertTriangle class_names="h-5 w-5" />
-						<Alert.Title
-							>GitHub’s 1,000-result limit applies</Alert.Title
-						>
+						<Alert.Title>
+							GitHub’s 1,000-result limit applies
+						</Alert.Title>
 						<Alert.Description>
 							Large ranges may show partial totals and repository
 							data.

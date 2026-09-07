@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { cn } from '#lib/utils.js';
+	import { RotateCw } from '@lucide/svelte';
 
 	let { class: class_name = '' } = $props<{ class?: string }>();
 	let pattern = $state(0);
@@ -79,8 +80,10 @@
 			onclick={() => (pattern += 1)}
 			aria-label="Shuffle activity illustration"
 			class="gap-2 font-mono text-xs text-muted-foreground"
-			>Shuffle <span aria-hidden="true">↻</span></Button
 		>
+			Shuffle
+			<RotateCw class="size-4 shrink-0" aria-hidden="true" />
+		</Button>
 	</figcaption>
 	<div
 		class="grid grid-flow-col grid-rows-7 gap-1.5"

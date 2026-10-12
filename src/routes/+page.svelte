@@ -318,14 +318,6 @@
 					stats={github_query.current.primary}
 					comparison_stats={github_query.current.comparison}
 				/>
-				<ContributionCalendar
-					usernames={[
-						github_query.current.primary.username,
-						...(github_query.current.comparison
-							? [github_query.current.comparison.username]
-							: []),
-					]}
-				/>
 				{#if github_query.current.primary.since !== github_query.current.primary.until}
 					{#if (new SvelteDate(github_query.current.primary.until).getTime() - new SvelteDate(github_query.current.primary.since).getTime()) / 86400000 >= 7}
 						<CommitHeatmap
@@ -348,6 +340,14 @@
 						comparison_stats={github_query.current.comparison}
 					/>
 				</div>
+				<ContributionCalendar
+					usernames={[
+						github_query.current.primary.username,
+						...(github_query.current.comparison
+							? [github_query.current.comparison.username]
+							: []),
+					]}
+				/>
 			</div>
 		{/if}
 	{:else}

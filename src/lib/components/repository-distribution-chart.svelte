@@ -9,6 +9,7 @@
 		Grid,
 		isometric,
 		LinearGradient,
+		PieChart,
 		Svg,
 		Tooltip,
 	} from 'layerchart';
@@ -71,11 +72,12 @@
 		),
 	);
 
-	// Both handles turn together
-	const view = create_isometric_view(() => ({
-		rotate: -30,
-		tilt: 62,
-	}));
+	// Both handles turn together. Opens as the flat donut; the towers
+	// are a turn away
+	const view = create_isometric_view(
+		() => ({ rotate: -30, tilt: 62 }),
+		true,
+	);
 
 	// Each colour is drawn as a gradient of its own, down every face
 	const uid = $props.id();
@@ -91,11 +93,17 @@
 	</header>
 
 	<div class="flex items-center gap-4 px-5 pt-4 sm:px-6">
-		<p class="text-xs text-muted-foreground max-sm:hidden">
-			Drag to turn
-		</p>
+		{#if !view.flat}
+			<p class="text-xs text-muted-foreground max-sm:hidden">
+				Drag to turn
+			</p>
+		{/if}
 		<div class="ml-auto">
-			<ChartViewControls {view} label="repository chart" />
+			<ChartViewControls
+				{view}
+				can_flatten
+				label="repository chart"
+			/>
 		</div>
 	</div>
 
@@ -117,107 +125,135 @@
 						]}
 					></span>
 					@{dataset.result.username}
-					<span class="ml-auto font-normal text-muted-foreground">
-						<span class="metric-number"
-							>{dataset.result.repositories.length}</span
-						>
-						{dataset.result.repositories.length === 1
-							? 'repo'
-							: 'repos'}
-					</span>
+					<!-- The donut carries this count at its centre -->
+					{#if !view.flat}
+						<span class="ml-auto font-normal text-muted-foreground">
+							<span class="metric-number"
+								>{dataset.result.repositories.length}</span
+							>
+							{dataset.result.repositories.length === 1
+								? 'repo'
+								: 'repos'}
+						</span>
+					{/if}
 				</p>
 
 				{#if dataset.data.length}
-					<div
-						class="mt-3 h-64 cursor-grab touch-pan-y select-none active:cursor-grabbing"
-					>
-						<Chart
-							data={dataset.data}
-							x="key"
-							xScale={scaleBand()
-								.paddingInner(0.25)
-								.paddingOuter(0.15)}
-							xDomain={dataset.data.map((item) => item.key)}
-							y={() => 'commits'}
-							yScale={scaleBand().paddingOuter(0.2)}
-							yDomain={['commits']}
-							z="value"
-							valueAxis="z"
-							zDomain={[0, max_value]}
-							zNice
-							zRange={({ width }: { width: number }) => [
-								0,
-								width * 0.45,
-							]}
-							c="color"
-							cScale={scaleOrdinal()}
-							cDomain={colors}
-							cRange={colors.map(
-								(_, index) => `url(#${gradient_id(index)})`,
-							)}
-							view={isometric({
-								...view.options,
-								// Never a long thin strip, however few repositories
-								aspect: Math.max(1.6, dataset.data.length / 2),
-							})}
-							transform={{ mode: 'canvas', drag: 'rotate' }}
-							onTransform={view.on_transform}
-							ondragstart={view.drag_start}
-							ondragend={view.drag_end}
-							tooltipContext={{ mode: 'manual' }}
-							padding={{ top: 12, bottom: 12, left: 36, right: 12 }}
-							clip
+					{#if view.flat}
+						<div class="reveal-up relative mx-auto mt-3 max-w-64">
+							<PieChart
+								data={dataset.data}
+								key="key"
+								value="value"
+								cRange={dataset.data.map((item) => item.color)}
+								innerRadius={-32}
+								cornerRadius={3}
+								padAngle={0.018}
+								height={220}
+							/>
+							<div
+								class="pointer-events-none absolute inset-0 grid place-content-center text-center"
+							>
+								<strong class="metric-number text-2xl">
+									{dataset.result.repositories.length}
+								</strong>
+								<span class="text-xs text-muted-foreground"
+									>repos</span
+								>
+							</div>
+						</div>
+					{:else}
+						<div
+							class="mt-3 h-64 cursor-grab touch-pan-y select-none active:cursor-grabbing"
 						>
-							<Svg>
-								{#each colors as color, index (index)}
-									<LinearGradient
-										id={gradient_id(index)}
-										stops={tower_gradient(color)}
-										vertical
-									/>
-								{/each}
-								<Frame
-									class="fill-foreground/3 stroke-foreground/15"
-								/>
-								<Grid
-									z
-									classes={{ line: 'stroke-foreground opacity-15' }}
-								/>
-								<Axis
-									placement="back"
-									ticks={3}
-									format="integer"
-									classes={{
-										tickLabel:
-											'!stroke-transparent fill-muted-foreground text-[11px]',
-									}}
-								/>
-								<Bars
-									tooltip
-									strokeWidth={1}
-									stroke="var(--card)"
-									class="repository-tower"
-								/>
-							</Svg>
-
-							<Tooltip.Root>
-								{#snippet children({
-									data,
-								}: {
-									data: RepositoryTower;
+							<Chart
+								data={dataset.data}
+								x="key"
+								xScale={scaleBand()
+									.paddingInner(0.25)
+									.paddingOuter(0.15)}
+								xDomain={dataset.data.map((item) => item.key)}
+								y={() => 'commits'}
+								yScale={scaleBand().paddingOuter(0.2)}
+								yDomain={['commits']}
+								z="value"
+								valueAxis="z"
+								zDomain={[0, max_value]}
+								zNice
+								zRange={({ width }: { width: number }) => [
+									0,
+									width * 0.45,
+								]}
+								c="color"
+								cScale={scaleOrdinal()}
+								cDomain={colors}
+								cRange={colors.map(
+									(_, index) => `url(#${gradient_id(index)})`,
+								)}
+								view={isometric({
+									...view.options,
+									// Never a long thin strip, however few repositories
+									aspect: Math.max(1.6, dataset.data.length / 2),
 								})}
-									<Tooltip.Header>{data.label}</Tooltip.Header>
-									<Tooltip.List>
-										<Tooltip.Item
-											label="Commits"
-											value={data.value}
-											color={data.color}
+								transform={{ mode: 'canvas', drag: 'rotate' }}
+								onTransform={view.on_transform}
+								ondragstart={view.drag_start}
+								ondragend={view.drag_end}
+								tooltipContext={{ mode: 'manual' }}
+								padding={{ top: 12, bottom: 12, left: 36, right: 12 }}
+								clip
+							>
+								<Svg>
+									{#each colors as color, index (index)}
+										<LinearGradient
+											id={gradient_id(index)}
+											stops={tower_gradient(color)}
+											vertical
 										/>
-									</Tooltip.List>
-								{/snippet}
-							</Tooltip.Root>
-						</Chart>
-					</div>
+									{/each}
+									<Frame
+										class="fill-foreground/3 stroke-foreground/15"
+									/>
+									<Grid
+										z
+										classes={{ line: 'stroke-foreground opacity-15' }}
+									/>
+									<Axis
+										placement="back"
+										ticks={3}
+										format="integer"
+										classes={{
+											tickLabel:
+												'!stroke-transparent fill-muted-foreground text-[11px]',
+										}}
+									/>
+									<Bars
+										tooltip
+										strokeWidth={1}
+										stroke="var(--card)"
+										class="repository-tower"
+									/>
+								</Svg>
+
+								<Tooltip.Root>
+									{#snippet children({
+										data,
+									}: {
+										data: RepositoryTower;
+									})}
+										<Tooltip.Header>{data.label}</Tooltip.Header>
+										<Tooltip.List>
+											<Tooltip.Item
+												label="Commits"
+												value={data.value}
+												color={data.color}
+											/>
+										</Tooltip.List>
+									{/snippet}
+								</Tooltip.Root>
+							</Chart>
+						</div>
+					{/if}
 
 					<ul class="mt-3 grid gap-3 text-base sm:text-sm">
 						{#each dataset.data as item (item.key)}

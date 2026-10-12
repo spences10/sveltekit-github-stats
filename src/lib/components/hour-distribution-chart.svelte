@@ -3,8 +3,10 @@
 	import { scaleBand, scaleOrdinal } from 'd3-scale';
 	import {
 		Axis,
+		BarChart,
 		Bars,
 		Chart,
+		defaultChartPadding,
 		Frame,
 		Grid,
 		isometric,
@@ -83,10 +85,11 @@
 		Math.max(1, ...towers.map((tower) => tower.value)),
 	);
 
-	const view = create_isometric_view(() => ({
-		rotate: -30,
-		tilt: 62,
-	}));
+	// Opens as the flat bar chart; the towers are a turn away
+	const view = create_isometric_view(
+		() => ({ rotate: -30, tilt: 62 }),
+		true,
+	);
 
 	// Each series is drawn as a gradient of its own, down every face
 	const uid = $props.id();
@@ -118,102 +121,121 @@
 
 	<div class="p-3 sm:p-5">
 		<div class="mb-2 flex items-center gap-4">
-			<p class="text-xs text-muted-foreground max-sm:hidden">
-				Drag to turn
-			</p>
+			{#if !view.flat}
+				<p class="text-xs text-muted-foreground max-sm:hidden">
+					Drag to turn
+				</p>
+			{/if}
 			<div class="ml-auto">
-				<ChartViewControls {view} label="commit timing chart" />
+				<ChartViewControls
+					{view}
+					can_flatten
+					label="commit timing chart"
+				/>
 			</div>
 		</div>
-		<div
-			class="h-80 cursor-grab touch-pan-y select-none active:cursor-grabbing"
-		>
-			<Chart
-				data={towers}
-				x="label"
-				xScale={scaleBand().paddingInner(0.25).paddingOuter(0.15)}
-				xDomain={hour_data.map((bucket) => bucket.label)}
-				y="series"
-				yScale={scaleBand().paddingInner(0.35).paddingOuter(0.2)}
-				yDomain={series.map((item) => item.key).reverse()}
-				z="value"
-				valueAxis="z"
-				zDomain={[0, max_value]}
-				zNice
-				zRange={({ width }: { width: number }) => [0, width * 0.4]}
-				c="series"
-				cScale={scaleOrdinal()}
-				cDomain={series.map((item) => item.key)}
-				cRange={series.map(
-					(item) => `url(#${gradient_id(item.key)})`,
-				)}
-				view={isometric({
-					...view.options,
-					// Never a long thin strip, even for a single handle
-					aspect: series.length > 1 ? 2.2 : 3.2,
-				})}
-				transform={{ mode: 'canvas', drag: 'rotate' }}
-				onTransform={view.on_transform}
-				ondragstart={view.drag_start}
-				ondragend={view.drag_end}
-				tooltipContext={{ mode: 'manual' }}
-				padding={{ top: 12, bottom: 28, left: 36, right: 12 }}
-				clip
+		{#if view.flat}
+			<div class="reveal-up">
+				<BarChart
+					data={hour_data}
+					x="label"
+					{series}
+					seriesLayout="group"
+					padding={defaultChartPadding({ left: 8, right: 8 })}
+					height={320}
+				/>
+			</div>
+		{:else}
+			<div
+				class="h-80 cursor-grab touch-pan-y select-none active:cursor-grabbing"
 			>
-				<Svg>
-					{#each series as item (item.key)}
-						<LinearGradient
-							id={gradient_id(item.key)}
-							stops={tower_gradient(item.color)}
-							vertical
-						/>
-					{/each}
-					<Frame class="fill-foreground/3 stroke-foreground/15" />
-					<Grid
-						z
-						classes={{ line: 'stroke-foreground opacity-15' }}
-					/>
-					<Axis
-						placement="bottom"
-						tickLabelProps={{ viewport: true }}
-						classes={{ tickLabel: tick_label }}
-					/>
-					<Axis
-						placement="back"
-						ticks={3}
-						format="integer"
-						classes={{ tickLabel: tick_label }}
-					/>
-					<!-- Each tower is its own hit area: the floor cell under
-					     the pointer may belong to a tower standing behind it -->
-					<Bars
-						tooltip
-						strokeWidth={1}
-						stroke="var(--card)"
-						class="hour-tower"
-					/>
-				</Svg>
-
-				<Tooltip.Root>
-					{#snippet children({
-						data,
-					}: {
-						data: (typeof hour_data)[number];
+				<Chart
+					data={towers}
+					x="label"
+					xScale={scaleBand().paddingInner(0.25).paddingOuter(0.15)}
+					xDomain={hour_data.map((bucket) => bucket.label)}
+					y="series"
+					yScale={scaleBand().paddingInner(0.35).paddingOuter(0.2)}
+					yDomain={series.map((item) => item.key).reverse()}
+					z="value"
+					valueAxis="z"
+					zDomain={[0, max_value]}
+					zNice
+					zRange={({ width }: { width: number }) => [0, width * 0.4]}
+					c="series"
+					cScale={scaleOrdinal()}
+					cDomain={series.map((item) => item.key)}
+					cRange={series.map(
+						(item) => `url(#${gradient_id(item.key)})`,
+					)}
+					view={isometric({
+						...view.options,
+						// Never a long thin strip, even for a single handle
+						aspect: series.length > 1 ? 2.2 : 3.2,
 					})}
-						<Tooltip.Header>{data.label} UTC</Tooltip.Header>
-						<Tooltip.List>
-							{#each series as item (item.key)}
-								<Tooltip.Item
-									label={item.label}
-									value={data[item.key]}
-									color={item.color}
-								/>
-							{/each}
-						</Tooltip.List>
-					{/snippet}
-				</Tooltip.Root>
-			</Chart>
-		</div>
+					transform={{ mode: 'canvas', drag: 'rotate' }}
+					onTransform={view.on_transform}
+					ondragstart={view.drag_start}
+					ondragend={view.drag_end}
+					tooltipContext={{ mode: 'manual' }}
+					padding={{ top: 12, bottom: 28, left: 36, right: 12 }}
+					clip
+				>
+					<Svg>
+						{#each series as item (item.key)}
+							<LinearGradient
+								id={gradient_id(item.key)}
+								stops={tower_gradient(item.color)}
+								vertical
+							/>
+						{/each}
+						<Frame class="fill-foreground/3 stroke-foreground/15" />
+						<Grid
+							z
+							classes={{ line: 'stroke-foreground opacity-15' }}
+						/>
+						<Axis
+							placement="bottom"
+							tickLabelProps={{ viewport: true }}
+							classes={{ tickLabel: tick_label }}
+						/>
+						<Axis
+							placement="back"
+							ticks={3}
+							format="integer"
+							classes={{ tickLabel: tick_label }}
+						/>
+						<!-- Each tower is its own hit area: the floor cell under
+						     the pointer may belong to a tower standing behind it -->
+						<Bars
+							tooltip
+							strokeWidth={1}
+							stroke="var(--card)"
+							class="hour-tower"
+						/>
+					</Svg>
+
+					<Tooltip.Root>
+						{#snippet children({
+							data,
+						}: {
+							data: (typeof hour_data)[number];
+						})}
+							<Tooltip.Header>{data.label} UTC</Tooltip.Header>
+							<Tooltip.List>
+								{#each series as item (item.key)}
+									<Tooltip.Item
+										label={item.label}
+										value={data[item.key]}
+										color={item.color}
+									/>
+								{/each}
+							</Tooltip.List>
+						{/snippet}
+					</Tooltip.Root>
+				</Chart>
+			</div>
+		{/if}
 	</div>
 </section>
 

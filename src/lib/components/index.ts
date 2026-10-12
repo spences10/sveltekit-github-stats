@@ -11,3 +11,4 @@ export { default as StatsOverview } from './stats-overview.svelte';
 export { default as ThemeToggle } from './theme-toggle.svelte';
 export { default as CommitHeatmap } from './commit-heatmap.svelte';
 export { default as ActivityIllustration } from './activity-illustration.svelte';
+export { default as ContributionCalendar } from './contribution-calendar.svelte';

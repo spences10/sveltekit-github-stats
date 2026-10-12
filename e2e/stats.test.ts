@@ -63,6 +63,21 @@ async function mock_stats(page: Page, failing_user?: string) {
 			});
 		}
 	});
+	await page.route('**/api/github-contributions?*', async (route) => {
+		const params = new URL(route.request().url()).searchParams;
+		const since = params.get('since') ?? '';
+		await route.fulfill({
+			json: {
+				username: params.get('username') ?? '',
+				since,
+				until: params.get('until') ?? '',
+				total_contributions: 4,
+				years: [2026, 2025],
+				daily_contributions: [{ date: since, count: 4 }],
+				fetched_at: '2026-09-07T12:00:00.000Z',
+			},
+		});
+	});
 	return requests;
 }
 
@@ -85,6 +100,25 @@ test('custom-date comparison renders results and remembers handles', async ({
 	await page.getByRole('button', { name: 'Show stats' }).click();
 
 	await expect(page.getByText('7 commits apart')).toBeVisible();
+	// Each handle gets a contribution calendar, opened as a heatmap.
+	const contributions = page.getByRole('region', {
+		name: 'Contribution calendar',
+		exact: true,
+	});
+	await expect(
+		contributions.getByText('4 contributions', { exact: true }),
+	).toHaveCount(2);
+	await expect(
+		contributions.getByRole('button', {
+			name: 'Show alice contribution calendar flat',
+		}),
+	).toHaveAttribute('aria-pressed', 'true');
+	await contributions.getByLabel('Period').selectOption('2025');
+	await expect(
+		contributions.getByRole('heading', {
+			name: 'Contributions in 2025',
+		}),
+	).toBeVisible();
 	await expect(
 		page.locator('time[datetime="2026-09-07T12:00:00.000Z"]'),
 	).toHaveCount(2);
@@ -224,6 +258,13 @@ test('rolling month shows a heatmap; daily and weekly ranges do not', async ({
 			exact: true,
 		}),
 	).toBeVisible();
+	// The days stand as towers, and the calendar can still be read flat.
+	await expect(page.locator('.skyline-tower').first()).toBeVisible();
+	const flat = page.getByRole('button', {
+		name: 'Show alice commit calendar flat',
+	});
+	await flat.click();
+	await expect(flat).toHaveAttribute('aria-pressed', 'true');
 	await page.getByText('View daily counts', { exact: true }).click();
 	await expect(page.getByRole('table')).toBeVisible();
 	await expect(
@@ -258,12 +299,5 @@ test('rolling month shows a heatmap; daily and weekly ranges do not', async ({
 			name: 'Commit calendar',
 			exact: true,
 		}),
-	// The days stand as towers, and the calendar can still be read flat.
-	await expect(page.locator('.skyline-tower').first()).toBeVisible();
-	const flat = page.getByRole('button', {
-		name: 'Show alice commit calendar flat',
-	});
-	await flat.click();
-	await expect(flat).toHaveAttribute('aria-pressed', 'true');
 	).toHaveCount(0);
 });

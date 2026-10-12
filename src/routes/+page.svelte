@@ -3,6 +3,7 @@
 		ActivityIllustration,
 		AdvancedOptions,
 		CommitHeatmap,
+		ContributionCalendar,
 		DailyActivityChart,
 		FormInput,
 		HourDistributionChart,
@@ -317,6 +318,14 @@
 						/>
 					{/if}
 					<DailyActivityChart
+				<ContributionCalendar
+					usernames={[
+						github_query.current.primary.username,
+						...(github_query.current.comparison
+							? [github_query.current.comparison.username]
+							: []),
+					]}
+				/>
 						stats={github_query.current.primary}
 						comparison_stats={github_query.current.comparison}
 					/>

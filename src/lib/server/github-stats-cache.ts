@@ -9,14 +9,16 @@ import {
 export type github_stats_response = github_stats_result & {
 	fetched_at: string;
 };
-const cache_entry_schema = v.object({
-	result: v.object({
-		...github_stats_schema.entries,
-		fetched_at: v.pipe(v.string(), v.isoTimestamp()),
-	}),
-	expires_at: v.pipe(v.number(), v.finite()),
-});
-type CacheEntry = v.InferOutput<typeof cache_entry_schema>;
+type RangeResult = { username: string; since: string; until: string };
+type Fetched<T> = T & { fetched_at: string };
+type CacheEntry<T> = { result: Fetched<T>; expires_at: number };
+type CacheConfig<T extends RangeResult> = {
+	schema: v.GenericSchema<unknown, T>;
+	// Names the cached data and its shape; change it when either changes
+	path: string;
+	// Seconds to keep a result, given whether its range has ended
+	ttl: (range_ended: boolean) => number;
+};
 export type StatsCacheStorage = Pick<Cache, 'match' | 'put'>;
 type CacheOptions = {
 	origin: string;
@@ -26,14 +28,22 @@ type CacheOptions = {
 
 /** Cloudflare storage is shared within a data centre; in-flight work is shared
  * only within this Worker instance. Memory also supports local development. */
-export function create_stats_cache(
-	load: (params: github_params) => Promise<github_stats_result>,
+export function create_range_cache<T extends RangeResult>(
+	load: (params: github_params) => Promise<T>,
+	config: CacheConfig<T>,
 ) {
-	const memory = new Map<string, CacheEntry>();
-	const pending = new Map<string, Promise<github_stats_response>>();
+	const cache_entry_schema = v.object({
+		result: v.intersect([
+			config.schema,
+			v.object({ fetched_at: v.pipe(v.string(), v.isoTimestamp()) }),
+		]),
+		expires_at: v.pipe(v.number(), v.finite()),
+	});
+	const memory = new Map<string, CacheEntry<T>>();
+	const pending = new Map<string, Promise<Fetched<T>>>();
 	const max_entries = 50;
 
-	function remember(key: string, entry: CacheEntry) {
+	function remember(key: string, entry: CacheEntry<T>) {
 		for (const [existing_key, existing] of memory) {
 			if (existing.expires_at <= Date.now())
 				memory.delete(existing_key);
@@ -47,7 +57,7 @@ export function create_stats_cache(
 	return async (
 		input: github_params,
 		options: CacheOptions,
-	): Promise<github_stats_response> => {
+	): Promise<Fetched<T>> => {
 		const parsed = v.parse(github_params_schema, input);
 		const params = {
 			...parsed,
@@ -58,7 +68,7 @@ export function create_stats_cache(
 				'The start date must be on or before the end date.',
 			);
 		const key_url = new URL(
-			`/__github-stats-cache/v2/${options.namespace}`,
+			`/${config.path}/${options.namespace}`,
 			options.origin,
 		);
 		key_url.search = new URLSearchParams(params).toString();
@@ -96,8 +106,8 @@ export function create_stats_cache(
 			const stats = await load(params);
 			const now = Date.now();
 			const fetched_at = new Date(now).toISOString();
-			const ttl = params.until < fetched_at.slice(0, 10) ? 3600 : 60;
-			const entry: CacheEntry = {
+			const ttl = config.ttl(params.until < fetched_at.slice(0, 10));
+			const entry: CacheEntry<T> = {
 				result: { ...stats, fetched_at },
 				expires_at: now + ttl * 1000,
 			};
@@ -124,3 +134,12 @@ export function create_stats_cache(
 		}
 	};
 }
+
+export const create_stats_cache = (
+	load: (params: github_params) => Promise<github_stats_result>,
+) =>
+	create_range_cache(load, {
+		schema: github_stats_schema,
+		path: '__github-stats-cache/v2',
+		ttl: (range_ended) => (range_ended ? 3600 : 60),
+	});

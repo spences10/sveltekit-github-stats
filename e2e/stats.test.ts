@@ -258,5 +258,12 @@ test('rolling month shows a heatmap; daily and weekly ranges do not', async ({
 			name: 'Commit calendar',
 			exact: true,
 		}),
+	// The days stand as towers, and the calendar can still be read flat.
+	await expect(page.locator('.skyline-tower').first()).toBeVisible();
+	const flat = page.getByRole('button', {
+		name: 'Show alice commit calendar flat',
+	});
+	await flat.click();
+	await expect(flat).toHaveAttribute('aria-pressed', 'true');
 	).toHaveCount(0);
 });

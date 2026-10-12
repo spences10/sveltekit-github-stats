@@ -44,6 +44,9 @@
 	let year = $state(new SvelteDate().getFullYear().toString());
 	let since = $state(initial_date);
 	let until = $state(initial_date);
+	// The handle from the last visit, for the hero grid: not what is
+	// being typed
+	let saved_username = $state('');
 	let comparison_error = $state<Error | null>(null);
 	let github_query = $state<{
 		loading: boolean;
@@ -151,6 +154,7 @@
 
 	onMount(() => {
 		username = localStorage.getItem('github_username') ?? '';
+		saved_username = username;
 		comparison_username =
 			localStorage.getItem('github_comparison_username') ?? '';
 	});
@@ -179,7 +183,11 @@
 			count.
 		</p>
 	</div>
-	<ActivityIllustration class="max-lg:hidden" />
+	<ActivityIllustration
+		class="max-lg:hidden"
+		username={github_query?.current?.primary.username ??
+			saved_username}
+	/>
 </section>
 
 <section
@@ -310,14 +318,6 @@
 					stats={github_query.current.primary}
 					comparison_stats={github_query.current.comparison}
 				/>
-				{#if github_query.current.primary.since !== github_query.current.primary.until}
-					{#if (new SvelteDate(github_query.current.primary.until).getTime() - new SvelteDate(github_query.current.primary.since).getTime()) / 86400000 >= 7}
-						<CommitHeatmap
-							stats={github_query.current.primary}
-							comparison_stats={github_query.current.comparison}
-						/>
-					{/if}
-					<DailyActivityChart
 				<ContributionCalendar
 					usernames={[
 						github_query.current.primary.username,
@@ -326,6 +326,14 @@
 							: []),
 					]}
 				/>
+				{#if github_query.current.primary.since !== github_query.current.primary.until}
+					{#if (new SvelteDate(github_query.current.primary.until).getTime() - new SvelteDate(github_query.current.primary.since).getTime()) / 86400000 >= 7}
+						<CommitHeatmap
+							stats={github_query.current.primary}
+							comparison_stats={github_query.current.comparison}
+						/>
+					{/if}
+					<DailyActivityChart
 						stats={github_query.current.primary}
 						comparison_stats={github_query.current.comparison}
 					/>

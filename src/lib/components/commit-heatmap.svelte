@@ -4,10 +4,13 @@
 	import CommitSkyline from './commit-skyline.svelte';
 	import DailyCountsTable from './daily-counts-table.svelte';
 
-	let { stats, comparison_stats = null } = $props<{
+	let {
+		stats,
+		comparison_stats = null,
+	}: {
 		stats: github_stats_result;
 		comparison_stats?: github_stats_result | null;
-	}>();
+	} = $props();
 	// Calendar lays out local calendar dates; construct from date parts so
 	// the UTC date keys from GitHub do not shift in the viewer's timezone.
 	const calendar_date = (date: string) => {

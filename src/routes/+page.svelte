@@ -31,7 +31,7 @@
 		comparison: github_stats_response | null;
 	};
 
-	let { data } = $props<{ data: PageData }>();
+	let { data }: { data: PageData } = $props();
 
 	const { initial_date, initial_date_option } = untrack(() => ({
 		initial_date: data.initial_date || '',

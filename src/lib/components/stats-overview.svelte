@@ -2,14 +2,17 @@
 	import type { github_stats_response } from '#lib/server/github-stats-cache.js';
 	import type { github_stats_result } from '#lib/server/github-stats.js';
 
-	let { stats, comparison_stats = null } = $props<{
+	let {
+		stats,
+		comparison_stats = null,
+	}: {
 		stats: github_stats_result &
 			Partial<Pick<github_stats_response, 'fetched_at'>>;
 		comparison_stats?:
 			| (github_stats_result &
 					Partial<Pick<github_stats_response, 'fetched_at'>>)
 			| null;
-	}>();
+	} = $props();
 
 	const format_date = (date: string) =>
 		new Intl.DateTimeFormat('en', {

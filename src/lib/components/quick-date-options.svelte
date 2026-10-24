@@ -8,11 +8,11 @@
 		on_quick_date_select,
 		current_date_option = $bindable(),
 		disabled = false,
-	} = $props<{
+	}: {
 		on_quick_date_select: (option: QuickDateOption) => void;
 		current_date_option: string;
 		disabled?: boolean;
-	}>();
+	} = $props();
 </script>
 
 <div class="grid gap-3 sm:grid-cols-[6rem_1fr] sm:items-center">

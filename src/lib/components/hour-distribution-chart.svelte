@@ -20,10 +20,13 @@
 		tower_gradient,
 	} from './isometric-view.svelte';
 
-	let { stats, comparison_stats = null } = $props<{
+	let {
+		stats,
+		comparison_stats = null,
+	}: {
 		stats: github_stats_result;
 		comparison_stats?: github_stats_result | null;
-	}>();
+	} = $props();
 
 	type HourCommit = { hour: number; count: number };
 

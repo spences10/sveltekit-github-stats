@@ -9,10 +9,13 @@
 	} from 'layerchart';
 	import { SvelteDate } from 'svelte/reactivity';
 
-	let { stats, comparison_stats = null } = $props<{
+	let {
+		stats,
+		comparison_stats = null,
+	}: {
 		stats: github_stats_result;
 		comparison_stats?: github_stats_result | null;
-	}>();
+	} = $props();
 
 	type DailyCommit = { date: string; count: number };
 

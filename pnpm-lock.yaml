@@ -224,8 +224,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       layerchart:
-        specifier: 2.9.0
-        version: 2.9.0(@sveltejs/kit@3.1.0(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)
+        specifier: 2.9.1
+        version: 2.9.1(@sveltejs/kit@3.1.0(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)
       playwright:
         specifier: ^1.64.1
         version: 1.64.1
@@ -1978,8 +1978,8 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
-  layerchart@2.9.0:
-    resolution: {integrity: sha512-jsbx9c2qde08uM/tf2Op1e5nF94N0t+NGr8GEVnvC48hjElGXgMEXFi2B+927tNPCO2mONsPvKweGMo07qya2w==}
+  layerchart@2.9.1:
+    resolution: {integrity: sha512-ftS5hcrogs+AhfSnNzTkFZCMTjPh3UYcU7MNMpN+M+SHx1AIm/IKxY2t2cJMmxAmc+JJfbB5Z6BmnqV6v7IOnw==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -3391,18 +3391,6 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/browser-preview@5.0.5(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0))(vitest@5.0.5)':
-    dependencies:
-      '@testing-library/dom': 10.4.2
-      '@testing-library/user-event': 14.6.7(@testing-library/dom@10.4.2)
-      '@vitest/browser': 5.0.5(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0))(vitest@5.0.5)
-      vitest: 5.0.5(@types/node@26.6.5)(@vitest/browser-playwright@5.0.5)(@vitest/browser-preview@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0))
-    transitivePeerDependencies:
-      - bufferutil
-      - msw
-      - utf-8-validate
-      - vite
-
   '@vitest/browser@5.0.5(@voidzero-dev/vite-plus-core@1.4.0(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(typescript@6.0.3))(vitest@5.0.5)':
     dependencies:
       '@blazediff/core': 1.10.0
@@ -3840,7 +3828,7 @@ snapshots:
 
   kleur@4.1.5: {}
 
-  layerchart@2.9.0(@sveltejs/kit@3.1.0(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2):
+  layerchart@2.9.1(@sveltejs/kit@3.1.0(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)))(svelte@5.57.2):
     dependencies:
       '@dagrejs/dagre': 2.0.4
       '@layerstack/svelte-actions': 1.0.1-next.20
